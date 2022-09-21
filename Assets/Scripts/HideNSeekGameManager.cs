@@ -11,14 +11,15 @@ public class HideNSeekGameManager : NetworkBehaviour
     [SerializeField] private int _numberOfPlayersInLobby = 1;
     [SerializeField] private Button _seekerButton;
     [SerializeField] private Button _startGameButton;
-    
+    [SerializeField] private GameContextUI _gameContextUI;
+
     private NetworkVariable<bool> _isSeekerAvailable = new NetworkVariable<bool>();
-    
+
     private bool _hasGameStarted;
     private ulong _hostClientID;
-    
+
     private Dictionary<ulong, PlayerController> _playerControllers;
-    
+
     private void Awake()
     {
         _playerControllers = new Dictionary<ulong, PlayerController>();
@@ -29,10 +30,10 @@ public class HideNSeekGameManager : NetworkBehaviour
         if (IsHost)
         {
             _startGameButton.gameObject.SetActive(true);
-          //  _startGameButton.interactable = false;
+            //  _startGameButton.interactable = false;
             _startGameButton.onClick.AddListener(OnGameStarted);
         }
-        
+
         if (!IsServer) return;
         _isSeekerAvailable.Value = true;
         NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Singleton_OnClientConnectedCallback;
@@ -41,7 +42,7 @@ public class HideNSeekGameManager : NetworkBehaviour
         ChooseCharacter.OnChooseHider += ChooseCharacter_OnChooseHider;
         _hostClientID = OwnerClientId;
     }
-    
+
     private void FixedUpdate()
     {
         if (!IsServer || _hasGameStarted) return;
@@ -58,7 +59,7 @@ public class HideNSeekGameManager : NetworkBehaviour
                     .OwnerClientId);
             }
         }
-        
+
         if (!_isSeekerAvailable.Value)
         {
             DisableSeekerButtonClientRpc();
@@ -67,6 +68,14 @@ public class HideNSeekGameManager : NetworkBehaviour
         if (_numberOfPlayersInLobby == 5)
         {
             _startGameButton.interactable = true;
+        }
+
+        if (Input.GetKeyDown(KeyCode.J))
+        {
+            foreach (var player in _playerControllers)
+            {
+                Debug.Log($"{player.Key} {player.Value}");
+            }
         }
     }
 
@@ -112,8 +121,16 @@ public class HideNSeekGameManager : NetworkBehaviour
 
     private void NetworkManager_Singleton_OnClientConnectedCallback(ulong connectedClientID)
     {
-        _numberOfPlayersInLobby++;
-        GameContextUI.Instance.SetPlayerCount(_numberOfPlayersInLobby);
+        ++_numberOfPlayersInLobby;
+        try
+        {
+            _gameContextUI.SetPlayerCount(_numberOfPlayersInLobby);
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e.Message);
+        }
+
         if (!_isSeekerAvailable.Value)
         {
             DisableSeekerButtonClientRpc(new ClientRpcParams
@@ -128,26 +145,27 @@ public class HideNSeekGameManager : NetworkBehaviour
 
     private void NetworkManager_Singleton_OnClientDisconnectCallback(ulong connectedClientID)
     {
-        _numberOfPlayersInLobby--;
-        GameContextUI.Instance.SetPlayerCount(_numberOfPlayersInLobby);
-        _playerControllers.Remove(connectedClientID);
-        SendPlayerBackToLobbyClientRpc(new ClientRpcParams
+        --_numberOfPlayersInLobby;
+        try
         {
-            Send = new ClientRpcSendParams
-            {
-                TargetClientIds = new ulong[] {connectedClientID}
-            }
-        });
+            _gameContextUI.SetPlayerCount(_numberOfPlayersInLobby);
+            _playerControllers.Remove(connectedClientID);
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e.Message);
+        }
     }
+
 
     private void OnGameStarted()
     {
-       // if(_numberOfPlayersInLobby!=5) return;
-       GameContextUI.Instance._gameStarted = true;
+        // if(_numberOfPlayersInLobby!=5) return;
+        _gameContextUI._gameStarted = true;
         _hasGameStarted = true;
         InteractSpawner.Instance.SpawnObjects();
         _startGameButton.gameObject.SetActive(false);
-        
+
         foreach (var client in NetworkManager.Singleton.ConnectedClients)
         {
             var clientPlayerController = client.Value.PlayerObject.GetComponent<PlayerController>();
@@ -182,11 +200,11 @@ public class HideNSeekGameManager : NetworkBehaviour
         {
             if (_playerControllers[clientID].TryGetComponent(out DragonController _dragonController))
             {
-                _dragonController.SetShowObjectiveTextClientRpc(message,new ClientRpcParams
+                _dragonController.SetShowObjectiveTextClientRpc(message, new ClientRpcParams
                 {
                     Send = new ClientRpcSendParams
                     {
-                        TargetClientIds = new ulong[]{ clientID}
+                        TargetClientIds = new ulong[] {clientID}
                     }
                 });
             }
@@ -195,11 +213,11 @@ public class HideNSeekGameManager : NetworkBehaviour
         {
             if (_playerControllers[clientID].TryGetComponent(out SeekerController _seekerController))
             {
-                _seekerController.SetShowObjectiveTextClientRpc(message,new ClientRpcParams
+                _seekerController.SetShowObjectiveTextClientRpc(message, new ClientRpcParams
                 {
                     Send = new ClientRpcSendParams
                     {
-                        TargetClientIds = new ulong[]{ clientID}
+                        TargetClientIds = new ulong[] {clientID}
                     }
                 });
             }

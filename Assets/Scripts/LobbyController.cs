@@ -28,6 +28,7 @@ public class LobbyController : MonoBehaviour
     private Lobby _connectedLobby;
     private string _playerID;
     private const string joinKeyCode = "j";
+    private bool _alreadySignedIn;
 
     private static LobbyController _instance;
 
@@ -53,6 +54,7 @@ public class LobbyController : MonoBehaviour
         catch (Exception e)
         {
             Debug.Log(e.Message);
+            _alreadySignedIn = true;
         }
 
         foreach (var button in buttons)
@@ -71,6 +73,7 @@ public class LobbyController : MonoBehaviour
 
     private void Start()
     {
+        
         //   _tempCamera.gameObject.SetActive(false);
         _transport = FindObjectOfType<UnityTransport>();
         buttons[0].onClick.AddListener(() => { CreateGame(); });

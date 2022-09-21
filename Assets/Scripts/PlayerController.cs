@@ -15,21 +15,24 @@ public abstract class PlayerController : NetworkBehaviour
     private NetworkVariable<float> _netMovement = new NetworkVariable<float>();
     private NetworkVariable<float> _netSprintTime = new NetworkVariable<float>();
 
-    [SerializeField] private bl_Joystick _joystick;
+    [Header("Player Controller Core")] [SerializeField]
+    private bl_Joystick _joystick;
+
     [SerializeField] private Canvas _canvas;
     [SerializeField] private TextMeshProUGUI _showObjectiveText;
     [SerializeField] protected Animator _animator;
     [SerializeField] private Button _sprintButton;
+    [SerializeField] protected SphereCollider _sphereCollider;
+    [SerializeField] protected LayerMask _interactLayerMask;
 
+    [Header("Player movements")] [SerializeField]
+    private float _movementSpeed = 1f;
 
-    [SerializeField] private float _movementSpeed = 1f;
     [SerializeField] private float _sprintSpeed = 2f;
     [SerializeField] private float _rotationSpeed = 20f;
 
-    [SerializeField] protected SphereCollider _sphereCollider;
-    [SerializeField] protected LayerMask _interactLayerMask;
-    [SerializeField] protected Collider[] _colliders;
 
+    protected Collider[] _colliders;
 
     private Vector3 _oldMovementPosition;
     private Vector3 _oldRotationPosition;

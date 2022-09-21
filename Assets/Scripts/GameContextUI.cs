@@ -20,57 +20,28 @@ public class GameContextUI : NetworkBehaviour
     public bool _gameStarted;
     private NetworkVariable<float> _currentGameTime = new NetworkVariable<float>();
 
-    public static GameContextUI Instance { get; private set; }
-
-    private void Awake()
-    {
-        Instance = this;
-    }
 
     private void Start()
     {
-        if (IsServer)
+        _exitGame.onClick.AddListener(() =>
         {
-            _exitGame.onClick.AddListener(() =>
+            // NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
+            NetworkManager.Singleton.Shutdown();
+            try
             {
-                // NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
-                NetworkManager.Singleton.Shutdown();
-                SceneManager.LoadScene("Lobby");
-            });
-        }
+                Destroy(FindObjectOfType<LobbyController>().gameObject);
+                Destroy(FindObjectOfType<NetworkManager>().gameObject);
+            }
+            catch (Exception e)
+            {
+                
+            }
 
-        if (IsClient && !IsServer)
-        {
-            _exitGame.onClick.AddListener(() =>
-            {
-                // SceneManager.LoadScene("Lobby");
-                DisconnectClientServerRpc(NetworkManager.Singleton.LocalClientId);
-                SceneManager.LoadScene("Lobby");
-                //NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
-            });
-        }
+            SceneManager.LoadScene("Lobby");
+        });
+
 
         _timerText.text = startTime.ToString(".0");
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    void DisconnectClientServerRpc(ulong clientID)
-    {
-        NetworkManager.Singleton.DisconnectClient(clientID);
-        // GoBackToLobbyClientRpc(new ClientRpcParams
-        //     {
-        //         Send = new ClientRpcSendParams
-        //         {
-        //             TargetClientIds = new ulong[] {clientID}
-        //         }
-        //     }
-        //     );
-    }
-
-    [ClientRpc]
-    void GoBackToLobbyClientRpc(ClientRpcParams rpcParams = default)
-    {
-        SceneManager.LoadScene("Lobby");
     }
 
     private void Update()

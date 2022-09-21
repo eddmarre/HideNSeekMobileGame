@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class SeekerController : PlayerController
 {
+    [Header("Seeker Controls")]
     [SerializeField] private int _hitCount;
     [SerializeField] private Button _interactButton;
     private int _health = 2;
@@ -17,12 +18,14 @@ public class SeekerController : PlayerController
         base.Start();
         if (IsClient && IsOwner)
         {
+            _interactButton.interactable=false;
             _interactButton.onClick.AddListener(() =>
             {
                 if (numberOfInteractablesInArea != 0)
                 {
                     if (!_colliders[0].TryGetComponent(out Interactable _interactable)) return;
                     _interactable.Interact();
+                    // _interactButton.interactable = false;
                 }
             });
         }
@@ -44,6 +47,15 @@ public class SeekerController : PlayerController
             _sphereCollider.radius, _colliders,
             _interactLayerMask);
 
+         if (numberOfInteractablesInArea != 0)
+         {
+             _interactButton.interactable = true;
+         }
+         else
+         {
+             _interactButton.interactable = false;
+         }
+         
         if (Input.GetKeyDown(KeyCode.E) && numberOfInteractablesInArea != 0)
         {
             if (!_colliders[0].TryGetComponent(out Interactable _interactable)) return;

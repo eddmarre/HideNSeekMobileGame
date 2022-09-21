@@ -7,11 +7,22 @@ using UnityEngine.UI;
 
 public class DragonController : PlayerController
 {
-    [SerializeField] private Transform _fireBallSpawnLocationTransform;
-    [SerializeField] private GameObject _fireBall;
-    [SerializeField] private Button _shootFireBallButton;
+    [Header("Dragon Controls")] [SerializeField]
+    private Button _shootFireBallButton;
+
     [SerializeField] private Button _attackButton;
+
+    [Header("Dragon Fire Ball")] [SerializeField]
+    private Transform _fireBallSpawnLocationTransform;
+
+    [SerializeField] private GameObject _fireBall;
+    [SerializeField] private float _fireBallCooldownTime = 5f;
+
+
     private int numberOfInteractablesInArea;
+    private float _timeSinceLastFireBallShot = 5f;
+
+    private NetworkVariable<bool> _hasShotFireball = new NetworkVariable<bool>();
 
     protected override void Start()
     {
@@ -48,6 +59,15 @@ public class DragonController : PlayerController
 
         if (IsServer)
         {
+            if (_hasShotFireball.Value)
+            {
+                _timeSinceLastFireBallShot -= Time.deltaTime;
+                if (_timeSinceLastFireBallShot < -0f)
+                {
+                    _timeSinceLastFireBallShot = _fireBallCooldownTime;
+                    _hasShotFireball.Value = false;
+                }
+            }
         }
 
         if (IsClient && IsOwner)
@@ -62,6 +82,24 @@ public class DragonController : PlayerController
         numberOfInteractablesInArea = Physics.OverlapSphereNonAlloc(_sphereCollider.transform.position,
             _sphereCollider.radius, _colliders,
             _interactLayerMask);
+
+        if (_hasShotFireball.Value)
+        {
+            _shootFireBallButton.interactable = false;
+        }
+        else
+        {
+            _shootFireBallButton.interactable = true;
+        }
+
+        if (numberOfInteractablesInArea != 0)
+        {
+            _attackButton.interactable = true;
+        }
+        else
+        {
+            _attackButton.interactable = false;
+        }
 
         if (Input.GetKeyDown(KeyCode.Q) && numberOfInteractablesInArea != 0)
         {
@@ -87,6 +125,10 @@ public class DragonController : PlayerController
     [ServerRpc]
     private void ShootFireBallServerRpc(Vector3 position, ulong clientID)
     {
+        if (_hasShotFireball.Value) return;
+
+        _hasShotFireball.Value = true;
+
         _animator.SetTrigger("fire");
 
         var fireball = Instantiate(_fireBall, position, Quaternion.identity);

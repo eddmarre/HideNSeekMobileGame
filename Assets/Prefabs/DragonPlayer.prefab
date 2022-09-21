@@ -2722,18 +2722,18 @@ MonoBehaviour:
   _showObjectiveText: {fileID: 6343916377892218429}
   _animator: {fileID: 2991435369671916329}
   _sprintButton: {fileID: 503665677191945703}
-  _movementSpeed: 1
-  _sprintSpeed: 2
-  _rotationSpeed: 20
   _sphereCollider: {fileID: 629045328}
   _interactLayerMask:
     serializedVersion: 2
     m_Bits: 512
-  _colliders: []
-  _fireBallSpawnLocationTransform: {fileID: 6291184751229787494}
-  _fireBall: {fileID: 2227997255541123642, guid: 28624f4ef18978f49b6b873eb99a1f9a, type: 3}
+  _movementSpeed: 1
+  _sprintSpeed: 2
+  _rotationSpeed: 20
   _shootFireBallButton: {fileID: 7022532020175981564}
   _attackButton: {fileID: 3268063941275006940}
+  _fireBallSpawnLocationTransform: {fileID: 6291184751229787494}
+  _fireBall: {fileID: 2227997255541123642, guid: 28624f4ef18978f49b6b873eb99a1f9a, type: 3}
+  _fireBallCooldownTime: 5
 --- !u!114 &6039926984646055700
 MonoBehaviour:
   m_ObjectHideFlags: 0
