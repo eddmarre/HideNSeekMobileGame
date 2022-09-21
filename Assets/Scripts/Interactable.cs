@@ -19,9 +19,13 @@ public class Interactable : NetworkBehaviour
         }
     }
 
+    #region ServerRpc
+
     [ServerRpc(RequireOwnership = false)]
     private void DestroyObjectServerRpc()
     {
         GetComponent<NetworkObject>().Despawn();
     }
+
+    #endregion
 }

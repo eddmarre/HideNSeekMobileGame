@@ -15,6 +15,7 @@ public class ChooseCharacter : NetworkBehaviour
 
     public static event Action<ulong> OnChooseSeeker;
     public static event Action<ulong> OnChooseHider;
+
     private void Start()
     {
         _dragonButton.onClick.AddListener(SpawnPlayerAsDragon);
@@ -27,7 +28,16 @@ public class ChooseCharacter : NetworkBehaviour
 
         gameObject.SetActive(false);
     }
-    
+
+    private void SpawnPlayerAsHider()
+    {
+        SpawnPlayerAsHiderServerRpc(NetworkManager.Singleton.LocalClientId);
+
+        gameObject.SetActive(false);
+    }
+
+    #region ServerRPC
+
     [ServerRpc(RequireOwnership = false)]
     private void SpawnPlayerAsDragonServerRpc(ulong clientId)
     {
@@ -38,21 +48,15 @@ public class ChooseCharacter : NetworkBehaviour
         OnChooseSeeker?.Invoke(clientId);
     }
 
-    private void SpawnPlayerAsHider()
-    {
-        SpawnPlayerAsHiderServerRpc(NetworkManager.Singleton.LocalClientId);
-
-        gameObject.SetActive(false);
-    }
-
-
     [ServerRpc(RequireOwnership = false)]
     private void SpawnPlayerAsHiderServerRpc(ulong clientId)
     {
         var dragon = Instantiate(_hiderPlayer, Vector3.up, Quaternion.identity);
         var netDragon = dragon.GetComponent<NetworkObject>();
         netDragon.SpawnAsPlayerObject(clientId, true);
-        
+
         OnChooseHider?.Invoke(clientId);
     }
+
+    #endregion
 }

@@ -20,6 +20,8 @@ public class HideNSeekGameManager : NetworkBehaviour
 
     private Dictionary<ulong, PlayerController> _playerControllers;
 
+    #region Monobehavior
+
     private void Awake()
     {
         _playerControllers = new Dictionary<ulong, PlayerController>();
@@ -88,20 +90,9 @@ public class HideNSeekGameManager : NetworkBehaviour
         // NetworkManager.Singleton.OnClientDisconnectCallback -= NetworkManager_Singleton_OnClientDisconnectCallback;
     }
 
-    [ClientRpc]
-    private void SendPlayerBackToLobbyClientRpc(ClientRpcParams rpcParams = default)
-    {
-        if (IsHost) return;
-        NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
-    }
+    #endregion
 
-
-    [ClientRpc]
-    private void DisableSeekerButtonClientRpc(ClientRpcParams rpcParams = default)
-    {
-        if (IsHost) return;
-        _seekerButton.interactable = _isSeekerAvailable.Value;
-    }
+    #region Events
 
     private void ChooseCharacter_OnChooseSeeker(ulong clientID)
     {
@@ -157,6 +148,9 @@ public class HideNSeekGameManager : NetworkBehaviour
         }
     }
 
+    #endregion
+
+    #region Method
 
     private void OnGameStarted()
     {
@@ -193,6 +187,10 @@ public class HideNSeekGameManager : NetworkBehaviour
         }
     }
 
+    #endregion
+
+    #region ServerRpc
+
     [ServerRpc(RequireOwnership = false)]
     void ShowTextForClientsServerRpc(ulong clientID, int controller, string message)
     {
@@ -223,4 +221,25 @@ public class HideNSeekGameManager : NetworkBehaviour
             }
         }
     }
+
+    #endregion
+
+    #region ClientRpc
+
+    [ClientRpc]
+    private void SendPlayerBackToLobbyClientRpc(ClientRpcParams rpcParams = default)
+    {
+        if (IsHost) return;
+        NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
+    }
+
+
+    [ClientRpc]
+    private void DisableSeekerButtonClientRpc(ClientRpcParams rpcParams = default)
+    {
+        if (IsHost) return;
+        _seekerButton.interactable = _isSeekerAvailable.Value;
+    }
+
+    #endregion
 }

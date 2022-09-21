@@ -24,6 +24,8 @@ public class DragonController : PlayerController
 
     private NetworkVariable<bool> _hasShotFireball = new NetworkVariable<bool>();
 
+    #region Monobehaviors
+
     protected override void Start()
     {
         base.Start();
@@ -76,6 +78,9 @@ public class DragonController : PlayerController
         }
     }
 
+    #endregion
+
+    #region Methods
 
     private void UpdateClient()
     {
@@ -83,23 +88,9 @@ public class DragonController : PlayerController
             _sphereCollider.radius, _colliders,
             _interactLayerMask);
 
-        if (_hasShotFireball.Value)
-        {
-            _shootFireBallButton.interactable = false;
-        }
-        else
-        {
-            _shootFireBallButton.interactable = true;
-        }
+        CanShootFireBallButtonEnabler();
 
-        if (numberOfInteractablesInArea != 0)
-        {
-            _attackButton.interactable = true;
-        }
-        else
-        {
-            _attackButton.interactable = false;
-        }
+        CanAttackButtonEnabler();
 
         if (Input.GetKeyDown(KeyCode.Q) && numberOfInteractablesInArea != 0)
         {
@@ -121,6 +112,33 @@ public class DragonController : PlayerController
         }
     }
 
+    private void CanAttackButtonEnabler()
+    {
+        if (numberOfInteractablesInArea != 0)
+        {
+            _attackButton.interactable = true;
+        }
+        else
+        {
+            _attackButton.interactable = false;
+        }
+    }
+
+    private void CanShootFireBallButtonEnabler()
+    {
+        if (_hasShotFireball.Value)
+        {
+            _shootFireBallButton.interactable = false;
+        }
+        else
+        {
+            _shootFireBallButton.interactable = true;
+        }
+    }
+
+    #endregion
+
+    #region ServerRpc
 
     [ServerRpc]
     private void ShootFireBallServerRpc(Vector3 position, ulong clientID)
@@ -148,4 +166,6 @@ public class DragonController : PlayerController
         transform.LookAt(attackedPlayerPosition);
         _animator.SetTrigger("attack");
     }
+
+    #endregion
 }

@@ -44,21 +44,14 @@ public abstract class PlayerController : NetworkBehaviour
     private float _sprintTime;
     private bool _canRun = true;
 
+    #region Monobehavior
+
     protected virtual void Start()
     {
         _initMovementSpeed = _movementSpeed;
         _colliders = new Collider[1];
         if (IsServer)
             _netMovement.Value = 1f;
-    }
-
-    public override void OnNetworkSpawn()
-    {
-        if (IsClient && IsOwner)
-        {
-            PlayerCameraFollow.Instance.FollowPlayer(transform);
-            _canvas.gameObject.SetActive(true);
-        }
     }
 
 
@@ -74,6 +67,19 @@ public abstract class PlayerController : NetworkBehaviour
             UpdateClient();
         }
     }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsClient && IsOwner)
+        {
+            PlayerCameraFollow.Instance.FollowPlayer(transform);
+            _canvas.gameObject.SetActive(true);
+        }
+    }
+
+    #endregion
+
+    #region Methods
 
     private void UpdateServer()
     {
@@ -137,6 +143,55 @@ public abstract class PlayerController : NetworkBehaviour
         }
     }
 
+    public void SetShowObjectiveText(string message)
+    {
+        _showObjectiveText.gameObject.SetActive(true);
+        _showObjectiveText.text = message;
+        StartCoroutine(DisableText());
+    }
+
+    #endregion
+    
+    #region TriggerEvents
+
+    //Event Trigger
+    public void SprintOnPointerDown()
+    {
+        if (_canRun)
+            _isRunning = true;
+        else
+        {
+            _isRunning = false;
+        }
+    }
+
+    //Event Trigger
+    public void SprintOnPointerUp()
+    {
+        _isRunning = false;
+    }
+
+    #endregion
+    
+    #region Coroutines
+
+    private IEnumerator DisableText()
+    {
+        yield return new WaitForSeconds(10f);
+        _showObjectiveText.gameObject.SetActive(false);
+    }
+
+    private IEnumerator ResetSprintButtonAfterSetTime()
+    {
+        yield return new WaitForSeconds(5f);
+        _sprintButton.interactable = true;
+        _canRun = true;
+    }
+
+    #endregion
+
+    #region ServerRpc
+
     [ServerRpc]
     private void ChangeMovementSpeedServerRpc(float speed, ulong clientID)
     {
@@ -160,21 +215,6 @@ public abstract class PlayerController : NetworkBehaviour
         }
     }
 
-    [ClientRpc]
-    private void DisableSprintClientRpc(ClientRpcParams rpcParams = default)
-    {
-        _canRun = false;
-        _sprintButton.interactable = false;
-        StartCoroutine(ResetSprintButtonAfterSetTime());
-    }
-
-    private IEnumerator ResetSprintButtonAfterSetTime()
-    {
-        yield return new WaitForSeconds(5f);
-        _sprintButton.interactable = true;
-        _canRun = true;
-    }
-
     [ServerRpc]
     private void MovePlayerServerRpc(Vector3 movementPosition, Vector3 rotation)
     {
@@ -188,28 +228,16 @@ public abstract class PlayerController : NetworkBehaviour
         _netWalking.Value = walking;
     }
 
-    //Event Trigger
-    public void SprintOnPointerDown()
-    {
-        if (_canRun)
-            _isRunning = true;
-        else
-        {
-            _isRunning = false;
-        }
-    }
+    #endregion
 
-    //Event Trigger
-    public void SprintOnPointerUp()
-    {
-        _isRunning = false;
-    }
+    #region ClientRpc
 
-    public void SetShowObjectiveText(string message)
+    [ClientRpc]
+    private void DisableSprintClientRpc(ClientRpcParams rpcParams = default)
     {
-        _showObjectiveText.gameObject.SetActive(true);
-        _showObjectiveText.text = message;
-        StartCoroutine(DisableText());
+        _canRun = false;
+        _sprintButton.interactable = false;
+        StartCoroutine(ResetSprintButtonAfterSetTime());
     }
 
     [ClientRpc]
@@ -220,9 +248,5 @@ public abstract class PlayerController : NetworkBehaviour
         StartCoroutine(DisableText());
     }
 
-    private IEnumerator DisableText()
-    {
-        yield return new WaitForSeconds(10f);
-        _showObjectiveText.gameObject.SetActive(false);
-    }
+    #endregion
 }

@@ -5,20 +5,22 @@ using UnityEngine.UI;
 
 public class SeekerController : PlayerController
 {
-    [Header("Seeker Controls")]
-    [SerializeField] private int _hitCount;
+    [Header("Seeker Controls")] [SerializeField]
+    private int _hitCount;
+
     [SerializeField] private Button _interactButton;
     private int _health = 2;
     private bool _isDead;
     private int numberOfInteractablesInArea;
-    
+
+    #region Monobehaviors
 
     protected override void Start()
     {
         base.Start();
         if (IsClient && IsOwner)
         {
-            _interactButton.interactable=false;
+            _interactButton.interactable = false;
             _interactButton.onClick.AddListener(() =>
             {
                 if (numberOfInteractablesInArea != 0)
@@ -41,21 +43,23 @@ public class SeekerController : PlayerController
         }
     }
 
+    #endregion
+
     private void UpdateClient()
     {
-         numberOfInteractablesInArea = Physics.OverlapSphereNonAlloc(_sphereCollider.transform.position,
+        numberOfInteractablesInArea = Physics.OverlapSphereNonAlloc(_sphereCollider.transform.position,
             _sphereCollider.radius, _colliders,
             _interactLayerMask);
 
-         if (numberOfInteractablesInArea != 0)
-         {
-             _interactButton.interactable = true;
-         }
-         else
-         {
-             _interactButton.interactable = false;
-         }
-         
+        if (numberOfInteractablesInArea != 0)
+        {
+            _interactButton.interactable = true;
+        }
+        else
+        {
+            _interactButton.interactable = false;
+        }
+
         if (Input.GetKeyDown(KeyCode.E) && numberOfInteractablesInArea != 0)
         {
             if (!_colliders[0].TryGetComponent(out Interactable _interactable)) return;
@@ -89,6 +93,8 @@ public class SeekerController : PlayerController
         }
     }
 
+    #region ServerRpc
+
     [ServerRpc(RequireOwnership = false)]
     private void HitPlayerServerRpc(ulong clientId)
     {
@@ -108,10 +114,16 @@ public class SeekerController : PlayerController
         }
     }
 
+    #endregion
+
+    #region ClientRpc
+
     [ClientRpc]
     private void OnDeathClientRpc(ClientRpcParams clientRpcParams = default)
     {
         Debug.Log("i've died ClientRpc");
         //Death Features go here
     }
+
+    #endregion
 }

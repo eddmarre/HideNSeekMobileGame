@@ -29,20 +29,13 @@ public class FireBall : NetworkBehaviour
         {
             Destroy(gameObject);
         }
-        
+
         if (IsClient && IsOwner)
         {
             DespawnOnNetworkServerRpc();
         }
-
     }
-
-    [ServerRpc]
-    private void DespawnOnNetworkServerRpc()
-    {
-        GetComponent<NetworkObject>().Despawn();
-    }
-
+    
     private void Update()
     {
         if (IsServer)
@@ -67,4 +60,14 @@ public class FireBall : NetworkBehaviour
         Debug.Log(collision.transform.name);
         DespawnOnNetwork();
     }
+
+    #region ServerRpc
+
+    [ServerRpc]
+    private void DespawnOnNetworkServerRpc()
+    {
+        GetComponent<NetworkObject>().Despawn();
+    }
+
+    #endregion
 }

@@ -34,7 +34,6 @@ public class GameContextUI : NetworkBehaviour
             }
             catch (Exception e)
             {
-                
             }
 
             SceneManager.LoadScene("Lobby");
@@ -61,20 +60,24 @@ public class GameContextUI : NetworkBehaviour
     }
 
 
-    [ClientRpc]
-    private void UpdateGameTimeClientRpc(float gameTime)
-    {
-        _timerText.text = gameTime.ToString(".00");
-    }
-
     public void SetPlayerCount(int numberOfPlayers)
     {
         UpdateGamePlayerCountClientRpc(numberOfPlayers);
     }
+
+    #region ClientRpc
 
     [ClientRpc]
     private void UpdateGamePlayerCountClientRpc(int numberOfPlayers)
     {
         _playerCountText.text = $"{numberOfPlayers}/5";
     }
+
+    [ClientRpc]
+    private void UpdateGameTimeClientRpc(float gameTime)
+    {
+        _timerText.text = gameTime.ToString(".00");
+    }
+
+    #endregion
 }
