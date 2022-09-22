@@ -25,7 +25,6 @@ public class GameContextUI : NetworkBehaviour
     {
         _exitGame.onClick.AddListener(() =>
         {
-            // NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
             NetworkManager.Singleton.Shutdown();
             try
             {
@@ -53,6 +52,7 @@ public class GameContextUI : NetworkBehaviour
 
         if (IsServer)
         {
+            //game over mechanic here
             if (_startTime <= 0f)
             {
                 _currentGameTime.Value = 0f;
@@ -63,7 +63,7 @@ public class GameContextUI : NetworkBehaviour
             UpdateGameTimeClientRpc(_currentGameTime.Value);
 
 
-            //game over mechanic here
+            
         }
     }
 
@@ -97,6 +97,21 @@ public class GameContextUI : NetworkBehaviour
     {
         _timerText.text = gameTime.ToString(".00");
     }
+
+    // [ClientRpc]
+    // private void ShutDownServerForAllClientRpc()
+    // {
+    //     NetworkManager.Singleton.SceneManager.LoadScene("Lobby",LoadSceneMode.Single);
+    //     NetworkManager.Singleton.Shutdown();
+    //     try
+    //     {
+    //         Destroy(FindObjectOfType<LobbyController>().gameObject);
+    //         Destroy(FindObjectOfType<NetworkManager>().gameObject);
+    //     }
+    //     catch (Exception e)
+    //     {
+    //     }
+    // }
 
     #endregion
 }

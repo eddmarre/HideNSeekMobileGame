@@ -1,4 +1,5 @@
-﻿using Unity.Netcode;
+﻿using System;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,6 +20,9 @@ public class HiderController : PlayerController
 
     private NetworkVariable<bool> _netIsDead = new NetworkVariable<bool>();
 
+    public static event Action<ulong> OnDeath;
+    public static event Action<ulong> OnRevive;
+
     #region Monobehaviors
 
     protected override void Start()
@@ -34,12 +38,9 @@ public class HiderController : PlayerController
                 {
                     if (!_interactableColliders[0].TryGetComponent(out Interactable _interactable)) return;
                     _interactable.Interact();
-                    // _interactButton.interactable = false;
                 }
                 else if (_numberOfPlayersInArea > 1)
                 {
-                    // if (!_hiderColliders[1].GetComponent<HiderController>().GetIsDead()) return;
-                    // var client = _hiderColliders[1].GetComponent<NetworkObject>().OwnerClientId;
                     ulong clientID;
                     foreach (var collider in _hiderColliders)
                     {
@@ -124,6 +125,7 @@ public class HiderController : PlayerController
                         TargetClientIds = new ulong[] {clientID}
                     }
                 });
+                OnDeath?.Invoke(clientID);
             }
         }
         else if (IsClient)
@@ -161,6 +163,7 @@ public class HiderController : PlayerController
                     TargetClientIds = new ulong[] {clientId}
                 }
             });
+            OnDeath?.Invoke(clientId);
         }
     }
 
@@ -177,6 +180,8 @@ public class HiderController : PlayerController
                 TargetClientIds = new[] {clientID}
             }
         });
+
+        OnRevive?.Invoke(clientID);
     }
 
     #endregion

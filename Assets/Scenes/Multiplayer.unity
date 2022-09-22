@@ -1562,7 +1562,7 @@ PrefabInstance:
       objectReference: {fileID: 1522929113615172358}
     - target: {fileID: 8234518629928239559, guid: 56731a728f27504479b0dca52e729985, type: 3}
       propertyPath: _gamePlayTime
-      value: 10
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 8234518629928239559, guid: 56731a728f27504479b0dca52e729985, type: 3}
       propertyPath: _seekerButton

@@ -23,13 +23,17 @@ public class HideNSeekGameManager : NetworkBehaviour
     private ulong _hostClientID;
 
     private Dictionary<ulong, PlayerController> _playerControllers;
+    private Dictionary<ulong, HiderController> _hidersAlive;
+    private Dictionary<ulong, HiderController> _hidersDead;
+
 
     #region Monobehavior
 
     private void Awake()
     {
         _playerControllers = new Dictionary<ulong, PlayerController>();
-        
+        _hidersAlive = new Dictionary<ulong, HiderController>();
+        _hidersDead = new Dictionary<ulong, HiderController>();
     }
 
     private void Start()
@@ -48,12 +52,46 @@ public class HideNSeekGameManager : NetworkBehaviour
         NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Singleton_OnClientDisconnectCallback;
         ChooseCharacter.OnChooseSeeker += ChooseCharacter_OnChooseSeeker;
         ChooseCharacter.OnChooseHider += ChooseCharacter_OnChooseHider;
+        HiderController.OnDeath += HiderController_OnDeath;
+        HiderController.OnRevive += HiderController_OnRevive;
         _gameContextUI.OnGameOver += GameContextUI_OnGameOver;
         _hostClientID = OwnerClientId;
     }
 
     private void FixedUpdate()
     {
+
+        if (IsServer)
+        {
+            if (Input.GetKeyDown(KeyCode.J))
+            {
+                foreach (var player in _playerControllers)
+                {
+                    Debug.Log($"Players {player.Key} {player.Value}");
+                }
+
+                foreach (var player in _hidersAlive)
+                {
+                    Debug.Log($"Alive {player.Key} {player.Value}");
+                }
+
+                foreach (var player in _hidersDead)
+                {
+                    Debug.Log($"Dead {player.Key} {player.Value}");
+                }
+            }
+        }
+        
+        
+        if (IsServer && _hasGameStarted)
+        {
+            if (_hidersAlive.Count == 0)
+            {
+                GameContextUI_OnGameOver();
+            }
+        }
+
+
         if (!IsServer || _hasGameStarted) return;
         var allSeekers = GameObject.FindGameObjectsWithTag("Dragon");
         if (allSeekers.Length > 1)
@@ -83,14 +121,7 @@ public class HideNSeekGameManager : NetworkBehaviour
         {
             _startGameButton.interactable = true;
         }
-
-        if (Input.GetKeyDown(KeyCode.J))
-        {
-            foreach (var player in _playerControllers)
-            {
-                Debug.Log($"{player.Key} {player.Value}");
-            }
-        }
+        
     }
 
     public override void OnDestroy()
@@ -98,6 +129,8 @@ public class HideNSeekGameManager : NetworkBehaviour
         base.OnDestroy();
         ChooseCharacter.OnChooseSeeker -= ChooseCharacter_OnChooseSeeker;
         ChooseCharacter.OnChooseHider -= ChooseCharacter_OnChooseHider;
+        HiderController.OnDeath -= HiderController_OnDeath;
+        HiderController.OnRevive -= HiderController_OnRevive;
         _gameContextUI.OnGameOver -= GameContextUI_OnGameOver;
         try
         {
@@ -219,7 +252,20 @@ public class HideNSeekGameManager : NetworkBehaviour
                 }
             });
         }
+
         _gameContextUI.SetHasGameStarted(false);
+    }
+
+    private void HiderController_OnDeath(ulong clientID)
+    {
+        _hidersDead.Add(clientID,_hidersAlive[clientID]);
+        _hidersAlive.Remove(clientID);
+    }
+
+    private void HiderController_OnRevive(ulong clientID)
+    {
+        _hidersAlive.Add(clientID,_hidersDead[clientID]);
+        _hidersDead.Remove(clientID);
     }
 
     #endregion
@@ -240,20 +286,21 @@ public class HideNSeekGameManager : NetworkBehaviour
             var clientPlayerController = client.Value.PlayerObject.GetComponent<PlayerController>();
             clientPlayerController.transform.position = new Vector3(0f, 10f, 0f);
 
-            if (clientPlayerController.transform.TryGetComponent(out SeekerController _dragonController))
+            if (clientPlayerController.transform.TryGetComponent(out SeekerController _seekerController))
             {
                 if (IsServer)
-                    _dragonController.SetShowObjectiveText("Go find all the hiders");
+                    _seekerController.SetShowObjectiveText("Go find all the hiders");
                 if (IsClient)
                 {
                     ShowTextForClientsServerRpc(client.Key, 0, "Go find all the hiders");
                 }
             }
 
-            if (clientPlayerController.transform.TryGetComponent(out HiderController _seekerController))
+            if (clientPlayerController.transform.TryGetComponent(out HiderController _hiderController))
             {
+                _hidersAlive.Add(client.Key, _hiderController);
                 if (IsServer)
-                    _seekerController.SetShowObjectiveText("Hide from the dragon");
+                    _hiderController.SetShowObjectiveText("Hide from the dragon");
                 if (IsClient)
                 {
                     ShowTextForClientsServerRpc(client.Key, 1, "Hide from the dragon");
