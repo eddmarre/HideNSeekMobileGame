@@ -1,4 +1,5 @@
 ﻿using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,11 +11,11 @@ public class HiderController : PlayerController
 
     [SerializeField] private Button _interactButton;
     [SerializeField] private LayerMask _playerLayerMask;
+    [SerializeField] private Collider[] _hiderColliders;
     private int _health = 2;
     private bool _isDead;
     private int _numberOfInteractablesInArea;
     private int _numberOfPlayersInArea;
-    [SerializeField] private Collider[] _hiderColliders;
 
     private NetworkVariable<bool> _netIsDead = new NetworkVariable<bool>();
 
@@ -35,16 +36,19 @@ public class HiderController : PlayerController
                     _interactable.Interact();
                     // _interactButton.interactable = false;
                 }
-                else if (_numberOfPlayersInArea > 1 && _hiderColliders[1].GetComponent<HiderController>().GetIsDead())
+                else if (_numberOfPlayersInArea > 1)
                 {
-                    var client = _hiderColliders[1].GetComponent<NetworkObject>().OwnerClientId;
-                    _hiderColliders[1].GetComponent<HiderController>().ReviveClientRpc(new ClientRpcParams
+                    // if (!_hiderColliders[1].GetComponent<HiderController>().GetIsDead()) return;
+                    // var client = _hiderColliders[1].GetComponent<NetworkObject>().OwnerClientId;
+                    ulong clientID;
+                    foreach (var collider in _hiderColliders)
                     {
-                        Send = new ClientRpcSendParams
+                        if (collider.GetComponent<NetworkObject>().OwnerClientId != OwnerClientId)
                         {
-                            TargetClientIds = new[] {client}
+                            clientID = collider.GetComponent<NetworkObject>().OwnerClientId;
+                            ReviveServerRpc(clientID);
                         }
-                    });
+                    }
                 }
             });
         }
@@ -52,6 +56,8 @@ public class HiderController : PlayerController
 
     protected override void Update()
     {
+        if (IsServer)
+            _animator.SetBool("isDead", _netIsDead.Value);
         if (_netIsDead.Value) return;
         base.Update();
         if (IsClient && IsOwner)
@@ -77,10 +83,15 @@ public class HiderController : PlayerController
         {
             _interactButton.interactable = true;
         }
-        else if (_numberOfPlayersInArea > 1 &&
-                 _hiderColliders[1].GetComponent<HiderController>().GetIsDead())
+        else if (_numberOfPlayersInArea > 1)
         {
-            _interactButton.interactable = true;
+            foreach (var collider in _hiderColliders)
+            {
+                if (collider.GetComponent<NetworkObject>().OwnerClientId != OwnerClientId)
+                {
+                   _interactButton.interactable = collider.GetComponent<HiderController>().GetIsDead();
+                }
+            }
         }
         else
         {
@@ -126,6 +137,11 @@ public class HiderController : PlayerController
         return _netIsDead.Value;
     }
 
+    public void SetIsDead(bool value)
+    {
+        _netIsDead.Value = value;
+    }
+
     #region ServerRpc
 
     [ServerRpc(RequireOwnership = false)]
@@ -137,7 +153,7 @@ public class HiderController : PlayerController
         {
             //_isDead = true;
             _netIsDead.Value = true;
-            _animator.SetTrigger("isDead");
+            // _animator.SetBool("isDead",_netIsDead.Value);
             OnDeathClientRpc(new ClientRpcParams
             {
                 Send = new ClientRpcSendParams
@@ -149,11 +165,18 @@ public class HiderController : PlayerController
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void ReviveServerRpc()
+    private void ReviveServerRpc(ulong clientID)
     {
-        //_isDead = false;
-        _netIsDead.Value = _isDead;
-        _hitCount = 0;
+        var hider = NetworkManager.Singleton.ConnectedClients[clientID].PlayerObject.GetComponent<HiderController>();
+        hider.SetIsDead(false);
+
+        hider.ReviveClientRpc(new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new[] {clientID}
+            }
+        });
     }
 
     #endregion
@@ -177,7 +200,7 @@ public class HiderController : PlayerController
         _interactButton.interactable = true;
         _sprintButton.interactable = true;
         _isDead = false;
-        ReviveServerRpc();
+        // ReviveServerRpc();
     }
 
     #endregion

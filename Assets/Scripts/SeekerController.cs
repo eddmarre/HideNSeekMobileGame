@@ -52,6 +52,8 @@ public class SeekerController : PlayerController
                     _seekerController.HitPlayer();
                 }
             });
+
+            _attackButton.interactable = false;
         }
     }
 
@@ -116,17 +118,13 @@ public class SeekerController : PlayerController
     {
         if (numberOfInteractablesInArea != 0)
         {
-            if (_interactableColliders[0].TryGetComponent(out HiderController _hiderController))
+            if (!_interactableColliders[0].TryGetComponent(out HiderController _hiderController))
             {
-                if (!_hiderController.GetIsDead()) return;
                 _attackButton.interactable = false;
+                return;
             }
-            
-            _attackButton.interactable = true;
-        }
-        else
-        {
-            _attackButton.interactable = false;
+
+            _attackButton.interactable = !_hiderController.GetIsDead();
         }
     }
 
