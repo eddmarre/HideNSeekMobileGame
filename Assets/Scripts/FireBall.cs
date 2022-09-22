@@ -58,6 +58,19 @@ public class FireBall : NetworkBehaviour
         if (collision.gameObject.Equals(_myPlayer)) return;
 
         Debug.Log(collision.transform.name);
+
+        if (collision.transform.TryGetComponent(out HiderController _seekerController))
+        {
+            if(IsServer)
+                _seekerController.HitPlayer();
+            if (IsClient)
+            {
+                var clientID=_seekerController.GetComponent<NetworkObject>().OwnerClientId;
+                HitPlayerServerRpc(clientID);
+            }
+        }
+        
+        
         DespawnOnNetwork();
     }
 
@@ -69,5 +82,10 @@ public class FireBall : NetworkBehaviour
         GetComponent<NetworkObject>().Despawn();
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    private void HitPlayerServerRpc(ulong seekerController)
+    {
+        NetworkManager.Singleton.ConnectedClients[seekerController].PlayerObject.GetComponent<HiderController>().HitPlayer();
+    }
     #endregion
 }

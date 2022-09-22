@@ -10,16 +10,16 @@ using UnityEngine.UI;
 
 public class GameContextUI : NetworkBehaviour
 {
-    [FormerlySerializedAs("_textMeshProUGUI")] [SerializeField]
-    private TextMeshProUGUI _timerText;
-
+    [SerializeField] private TextMeshProUGUI _timerText;
     [SerializeField] private TextMeshProUGUI _playerCountText;
-    [SerializeField] private float startTime = 300f;
-
     [SerializeField] private Button _exitGame;
-    public bool _gameStarted;
+
     private NetworkVariable<float> _currentGameTime = new NetworkVariable<float>();
 
+    private float _startTime = 1f;
+
+    private bool _gameStarted;
+    public event Action OnGameOver;
 
     private void Start()
     {
@@ -40,21 +40,29 @@ public class GameContextUI : NetworkBehaviour
         });
 
 
-        _timerText.text = startTime.ToString(".0");
+        _timerText.text = _startTime.ToString(".0");
     }
 
     private void Update()
     {
         if (IsHost && _gameStarted)
         {
-            startTime -= Time.deltaTime;
-            _currentGameTime.Value = startTime;
+            _startTime -= Time.deltaTime;
+            _currentGameTime.Value = _startTime;
         }
 
         if (IsServer)
         {
+            if (_startTime <= 0f)
+            {
+                _currentGameTime.Value = 0f;
+                OnGameOver?.Invoke();
+            }
+
             _timerText.text = _currentGameTime.Value.ToString(".0");
             UpdateGameTimeClientRpc(_currentGameTime.Value);
+
+
             //game over mechanic here
         }
     }
@@ -63,6 +71,17 @@ public class GameContextUI : NetworkBehaviour
     public void SetPlayerCount(int numberOfPlayers)
     {
         UpdateGamePlayerCountClientRpc(numberOfPlayers);
+    }
+
+    public void SetStartTime(float time)
+    {
+        _startTime = time;
+        _currentGameTime.Value = _startTime;
+    }
+
+    public void SetHasGameStarted(bool value)
+    {
+        _gameStarted = value;
     }
 
     #region ClientRpc

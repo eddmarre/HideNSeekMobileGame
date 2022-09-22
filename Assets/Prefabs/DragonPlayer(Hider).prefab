@@ -2419,16 +2419,18 @@ MonoBehaviour:
   _showObjectiveText: {fileID: 5200768782019172599}
   _animator: {fileID: 1062139329773256807}
   _sprintButton: {fileID: 1790313580419808971}
-  _movementSpeed: 1
-  _sprintSpeed: 2
-  _rotationSpeed: 20
   _sphereCollider: {fileID: 6619643815130856172}
   _interactLayerMask:
     serializedVersion: 2
     m_Bits: 256
-  _colliders: []
+  _movementSpeed: 1
+  _sprintSpeed: 2
+  _rotationSpeed: 20
   _hitCount: 0
   _interactButton: {fileID: 1257265660727781840}
+  _playerLayerMask:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!114 &6039926984646055700
 MonoBehaviour:
   m_ObjectHideFlags: 0

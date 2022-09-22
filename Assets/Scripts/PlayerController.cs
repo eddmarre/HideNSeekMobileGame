@@ -21,7 +21,7 @@ public abstract class PlayerController : NetworkBehaviour
     [SerializeField] private Canvas _canvas;
     [SerializeField] private TextMeshProUGUI _showObjectiveText;
     [SerializeField] protected Animator _animator;
-    [SerializeField] private Button _sprintButton;
+    [SerializeField] protected Button _sprintButton;
     [SerializeField] protected SphereCollider _sphereCollider;
     [SerializeField] protected LayerMask _interactLayerMask;
 
@@ -32,7 +32,7 @@ public abstract class PlayerController : NetworkBehaviour
     [SerializeField] private float _rotationSpeed = 20f;
 
 
-    protected Collider[] _colliders;
+    protected Collider[] _interactableColliders;
 
     private Vector3 _oldMovementPosition;
     private Vector3 _oldRotationPosition;
@@ -49,7 +49,7 @@ public abstract class PlayerController : NetworkBehaviour
     protected virtual void Start()
     {
         _initMovementSpeed = _movementSpeed;
-        _colliders = new Collider[1];
+        _interactableColliders = new Collider[1];
         if (IsServer)
             _netMovement.Value = 1f;
     }
