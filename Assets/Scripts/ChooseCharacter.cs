@@ -22,6 +22,8 @@ public class ChooseCharacter : NetworkBehaviour
         _hiderButton.onClick.AddListener(SpawnPlayerAsHider);
     }
 
+    #region Methods
+
     private void SpawnPlayerAsDragon()
     {
         SpawnPlayerAsDragonServerRpc(NetworkManager.Singleton.LocalClientId);
@@ -35,6 +37,8 @@ public class ChooseCharacter : NetworkBehaviour
 
         gameObject.SetActive(false);
     }
+
+    #endregion
 
     #region ServerRPC
 

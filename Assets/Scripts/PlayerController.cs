@@ -143,15 +143,17 @@ public abstract class PlayerController : NetworkBehaviour
         }
     }
 
-    public void SetShowObjectiveText(string message)
+    protected int CheckAreaAroundPlayer(SphereCollider _detectionPosition, Collider[] colliders, LayerMask layerMask)
     {
-        _showObjectiveText.gameObject.SetActive(true);
-        _showObjectiveText.text = message;
-        StartCoroutine(DisableText());
+        var numberOfThingsInArea = Physics.OverlapSphereNonAlloc(_detectionPosition.transform.position,
+            _detectionPosition.radius, colliders,
+            layerMask);
+
+        return numberOfThingsInArea;
     }
 
     #endregion
-    
+
     #region TriggerEvents
 
     //Event Trigger
@@ -172,7 +174,7 @@ public abstract class PlayerController : NetworkBehaviour
     }
 
     #endregion
-    
+
     #region Coroutines
 
     private IEnumerator DisableText()

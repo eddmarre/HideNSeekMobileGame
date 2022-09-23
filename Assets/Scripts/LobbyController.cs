@@ -31,21 +31,14 @@ public class LobbyController : MonoBehaviour
     private bool _alreadySignedIn;
 
     private static LobbyController _instance;
-
+    
+    #region Monobehaviors
     private async void Awake()
     {
-        if (_instance != null)
-        {
-            Destroy(gameObject);
-        }
-
-        _instance = this;
+        InitSingleton();
 
 
-        foreach (var button in buttons)
-        {
-            button.gameObject.SetActive(false);
-        }
+        SetButtonsActive(false);
 
         try
         {
@@ -57,21 +50,8 @@ public class LobbyController : MonoBehaviour
             _alreadySignedIn = true;
         }
 
-        foreach (var button in buttons)
-        {
-            button.gameObject.SetActive(true);
-        }
+        SetButtonsActive(true);
     }
-
-    private async Task Authenticate()
-    {
-        await UnityServices.InitializeAsync();
-        await AuthenticationService.Instance.SignInAnonymouslyAsync();
-        _playerID = AuthenticationService.Instance.PlayerId;
-    }
-
-    #region Monobehaviors
-
     private void Start()
     {
         //   _tempCamera.gameObject.SetActive(false);
@@ -127,6 +107,48 @@ public class LobbyController : MonoBehaviour
     }
 
     #endregion
+
+    #region Mehtods
+    
+    private void InitSingleton()
+    {
+        if (_instance != null)
+        {
+            Destroy(gameObject);
+        }
+
+        _instance = this;
+    }
+
+    private void SetButtonsActive(bool value)
+    {
+        foreach (var button in buttons)
+        {
+            button.gameObject.SetActive(value);
+        }
+    }
+    
+    private IEnumerator HeartBeatLobbyCoroutine(string lobbyId, float timeBetweenBeat)
+    {
+        while (true)
+        {
+            Lobbies.Instance.SendHeartbeatPingAsync(lobbyId);
+            yield return new WaitForSeconds(timeBetweenBeat);
+        }
+    }
+    
+    #endregion
+
+    #region AsyncMethods
+    
+
+    private async Task Authenticate()
+    {
+        await UnityServices.InitializeAsync();
+        await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        _playerID = AuthenticationService.Instance.PlayerId;
+    }
+
 
     private async void CreateGame()
     {
@@ -213,71 +235,7 @@ public class LobbyController : MonoBehaviour
             Debug.Log("couldn't Start Lobby");
         }
     }
+    #endregion
 
-    private IEnumerator HeartBeatLobbyCoroutine(string lobbyId, float timeBetweenBeat)
-    {
-        while (true)
-        {
-            Lobbies.Instance.SendHeartbeatPingAsync(lobbyId);
-            yield return new WaitForSeconds(timeBetweenBeat);
-        }
-    }
-
-    private async Task<Lobby> CreateLobby()
-    {
-        try
-        {
-            var allocation = await RelayService.Instance.CreateAllocationAsync(MaxPlayers);
-            var joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-            Debug.Log(joinCode);
-
-            var options = new CreateLobbyOptions
-            {
-                Data = new Dictionary<string, DataObject>
-                {
-                    {
-                        joinKeyCode,
-                        new DataObject(DataObject.VisibilityOptions.Public, joinCode)
-                    }
-                }
-            };
-
-            var lobby = await Lobbies.Instance.CreateLobbyAsync("Useless Lobby Name", MaxPlayers, options);
-
-            StartCoroutine(HeartBeatLobbyCoroutine(lobby.Id, 15));
-
-            _transport.SetHostRelayData(allocation.RelayServer.IpV4, (ushort) allocation.RelayServer.Port,
-                allocation.AllocationIdBytes,
-                allocation.Key, allocation.ConnectionData);
-
-            NetworkManager.Singleton.StartHost();
-            return lobby;
-        }
-        catch (Exception e)
-        {
-            Debug.Log("couldn't Start Lobby");
-            return null;
-        }
-    }
-
-    private async Task<Lobby> QuickJoinLobby()
-    {
-        try
-        {
-            var lobby = await Lobbies.Instance.QuickJoinLobbyAsync();
-
-            var allocation = await RelayService.Instance.JoinAllocationAsync(lobby.Data[joinKeyCode].Value);
-
-            _transport.SetClientRelayData(allocation.RelayServer.IpV4, (ushort) allocation.RelayServer.Port,
-                allocation.AllocationIdBytes, allocation.Key, allocation.ConnectionData, allocation.HostConnectionData);
-
-            NetworkManager.Singleton.StartClient();
-            return lobby;
-        }
-        catch (Exception e)
-        {
-            Debug.Log("couldn't find server");
-            return null;
-        }
-    }
+   
 }

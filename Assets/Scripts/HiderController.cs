@@ -18,7 +18,6 @@ public class HiderController : PlayerController
     [SerializeField] private HitVFX _hitVFX;
 
     private int _health = 2;
-    private bool _isDead;
     private int _numberOfInteractablesInArea;
     private int _numberOfPlayersInArea;
 
@@ -38,38 +37,17 @@ public class HiderController : PlayerController
             _netPlayerState._playerState = PlayerStateContainer.PlayerState.Alive;
         if (IsClient && IsOwner)
         {
-            _interactButton.interactable = false;
+            InitializeInteractButton();
             _healthText.text = _health.ToString();
-            _interactButton.onClick.AddListener(() =>
-            {
-                if (_numberOfInteractablesInArea != 0)
-                {
-                    if (!_interactableColliders[0].TryGetComponent(out Interactable _interactable)) return;
-                    _interactable.Interact();
-                }
-                else if (_numberOfPlayersInArea > 1)
-                {
-                    ulong clientID;
-                    foreach (var collider in _hiderColliders)
-                    {
-                        if (collider.GetComponent<NetworkObject>().OwnerClientId != OwnerClientId)
-                        {
-                            clientID = collider.GetComponent<NetworkObject>().OwnerClientId;
-                            ReviveServerRpc(clientID);
-                        }
-                    }
-                }
-            });
         }
     }
+
 
     protected override void Update()
     {
         if (IsServer)
         {
-            _animator.SetBool("hasDied",_netPlayerState._playerState == PlayerStateContainer.PlayerState.Dead);
-            _animator.SetBool("isDead", _netIsDead.Value);
-            _netPlayerState._playerState = PlayerStateContainer.PlayerState.Dead;
+            HandleDeath();
         }
 
         if (_netIsDead.Value) return;
@@ -82,17 +60,28 @@ public class HiderController : PlayerController
 
     #endregion
 
+    #region Methods
+
     private void UpdateClient()
     {
-        var _detectionPosition = _sphereCollider.transform.position;
-        _numberOfInteractablesInArea = Physics.OverlapSphereNonAlloc(_detectionPosition,
-            _sphereCollider.radius, _interactableColliders,
-            _interactLayerMask);
+        _numberOfInteractablesInArea =
+            CheckAreaAroundPlayer(_sphereCollider, _interactableColliders, _interactLayerMask);
 
-        _numberOfPlayersInArea = Physics.OverlapSphereNonAlloc(_detectionPosition,
-            _sphereCollider.radius,
-            _hiderColliders, _playerLayerMask);
+        _numberOfPlayersInArea = CheckAreaAroundPlayer(_sphereCollider, _hiderColliders, _playerLayerMask);
 
+        EnableOrDisableInteractableButtonIfItemsInCollider();
+#if UNITY_EDITOR
+
+        if (Input.GetKeyDown(KeyCode.E) && _numberOfInteractablesInArea != 0)
+        {
+            if (!_interactableColliders[0].TryGetComponent(out Interactable _interactable)) return;
+            _interactable.Interact();
+        }
+#endif
+    }
+
+    private void EnableOrDisableInteractableButtonIfItemsInCollider()
+    {
         if (_numberOfInteractablesInArea != 0)
         {
             _interactButton.interactable = true;
@@ -111,52 +100,31 @@ public class HiderController : PlayerController
         {
             _interactButton.interactable = false;
         }
-
-        if (Input.GetKeyDown(KeyCode.E) && _numberOfInteractablesInArea != 0)
-        {
-            if (!_interactableColliders[0].TryGetComponent(out Interactable _interactable)) return;
-            _interactable.Interact();
-        }
     }
-
-    public void HitPlayer()
+    
+    private void InitializeInteractButton()
     {
-        var clientID = GetComponent<NetworkObject>().OwnerClientId;
-        if (IsServer)
+        _interactButton.interactable = false;
+        _interactButton.onClick.AddListener(() =>
         {
-            ++_hitCount;
-            var currentHealth = _health - _hitCount;
-            HitPlayerClientRpc(currentHealth, new ClientRpcParams
+            if (_numberOfInteractablesInArea != 0)
             {
-                Send = new ClientRpcSendParams
-                {
-                    TargetClientIds = new[] {clientID}
-                }
-            });
-            if (_hitCount >= _health)
-            {
-                _netPlayerState._playerState = PlayerStateContainer.PlayerState.Dying;
-                _netIsDead.Value = true;
-                --_hitCount;
-                OnDeathClientRpc(new ClientRpcParams
-                {
-                    Send = new ClientRpcSendParams
-                    {
-                        TargetClientIds = new ulong[] {clientID}
-                    }
-                });
-                OnDeath?.Invoke(clientID);
+                if (!_interactableColliders[0].TryGetComponent(out Interactable _interactable)) return;
+                _interactable.Interact();
             }
-        }
-        else if (IsClient)
-        {
-            HitPlayerServerRpc(clientID);
-        }
-    }
-
-    public bool GetIsDead()
-    {
-        return _netIsDead.Value;
+            else if (_numberOfPlayersInArea > 1)
+            {
+                ulong clientID;
+                foreach (var collider in _hiderColliders)
+                {
+                    if (collider.GetComponent<NetworkObject>().OwnerClientId != OwnerClientId)
+                    {
+                        clientID = collider.GetComponent<NetworkObject>().OwnerClientId;
+                        ReviveServerRpc(clientID);
+                    }
+                }
+            }
+        });
     }
 
     private Animator GetAnimator()
@@ -173,6 +141,32 @@ public class HiderController : PlayerController
     {
         _netIsDead.Value = value;
     }
+
+    private void SetButtonsInteractable(bool value)
+    {
+        _interactButton.interactable = value;
+        _sprintButton.interactable = value;
+    }
+
+    private void HandleDeath()
+    {
+        _animator.SetBool("hasDied", _netPlayerState._playerState == PlayerStateContainer.PlayerState.Dead);
+        _animator.SetBool("isDead", _netIsDead.Value);
+        _netPlayerState._playerState = PlayerStateContainer.PlayerState.Dead;
+    }
+
+    public void HitPlayer()
+    {
+        var clientID = GetComponent<NetworkObject>().OwnerClientId;
+        HitPlayerServerRpc(clientID);
+    }
+
+    public bool GetIsDead()
+    {
+        return _netIsDead.Value;
+    }
+
+    #endregion
 
     #region ServerRpc
 
@@ -237,55 +231,17 @@ public class HiderController : PlayerController
     private void OnDeathClientRpc(ClientRpcParams clientRpcParams = default)
     {
         Debug.Log("i've died ClientRpc");
-        _interactButton.interactable = false;
-        _sprintButton.interactable = false;
-        _isDead = true;
-        //Death Features go here
+        SetButtonsInteractable(false);
     }
 
     [ClientRpc]
     private void ReviveClientRpc(ClientRpcParams clientRpcParams = default)
     {
         Debug.Log("I'm being revived");
-        _interactButton.interactable = true;
-        _sprintButton.interactable = true;
-        _isDead = false;
+        SetButtonsInteractable(true);
         var singleHealth = 1;
         _healthText.text = singleHealth.ToString();
     }
 
     #endregion
-}
-
-[Serializable]
-public class PlayerStateContainer : NetworkVariableBase
-{
-    public enum PlayerState
-    {
-        Alive = 0,
-        Dying = 1,
-        Dead = 2
-    }
-
-    public PlayerState _playerState;
-
-    public override void WriteDelta(FastBufferWriter writer)
-    {
-    }
-
-    public override void WriteField(FastBufferWriter writer)
-    {
-        writer.WriteValueSafe((int) _playerState);
-    }
-
-    public override void ReadField(FastBufferReader reader)
-    {
-        int tempPlayerState;
-        reader.ReadValueSafe(out tempPlayerState);
-        _playerState = (PlayerState) tempPlayerState;
-    }
-
-    public override void ReadDelta(FastBufferReader reader, bool keepDirtyDelta)
-    {
-    }
 }

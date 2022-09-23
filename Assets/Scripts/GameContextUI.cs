@@ -21,26 +21,14 @@ public class GameContextUI : NetworkBehaviour
     private bool _gameStarted;
     public event Action OnGameOver;
 
+    #region Monobehaviors
+
     private void Start()
     {
-        _exitGame.onClick.AddListener(() =>
-        {
-            NetworkManager.Singleton.Shutdown();
-            try
-            {
-                Destroy(FindObjectOfType<LobbyController>().gameObject);
-                Destroy(FindObjectOfType<NetworkManager>().gameObject);
-            }
-            catch (Exception e)
-            {
-            }
-
-            SceneManager.LoadScene("Lobby");
-        });
-
-
-        _timerText.text = _startTime.ToString(".0");
+        InitializeExitGameButton();
+        SetCurrenTimeText(_startTime);
     }
+
 
     private void Update()
     {
@@ -59,14 +47,36 @@ public class GameContextUI : NetworkBehaviour
                 OnGameOver?.Invoke();
             }
 
-            _timerText.text = _currentGameTime.Value.ToString(".0");
             UpdateGameTimeClientRpc(_currentGameTime.Value);
-
-
-            
         }
     }
 
+    #endregion
+
+    #region Methods
+
+    private void InitializeExitGameButton()
+    {
+        _exitGame.onClick.AddListener(() =>
+        {
+            NetworkManager.Singleton.Shutdown();
+            try
+            {
+                Destroy(FindObjectOfType<LobbyController>().gameObject);
+                Destroy(FindObjectOfType<NetworkManager>().gameObject);
+            }
+            catch (Exception e)
+            {
+            }
+
+            SceneManager.LoadScene("Lobby");
+        });
+    }
+
+    private void SetCurrenTimeText(float time)
+    {
+        _timerText.text = time.ToString(".0");
+    }
 
     public void SetPlayerCount(int numberOfPlayers)
     {
@@ -84,6 +94,8 @@ public class GameContextUI : NetworkBehaviour
         _gameStarted = value;
     }
 
+    #endregion
+
     #region ClientRpc
 
     [ClientRpc]
@@ -95,23 +107,8 @@ public class GameContextUI : NetworkBehaviour
     [ClientRpc]
     private void UpdateGameTimeClientRpc(float gameTime)
     {
-        _timerText.text = gameTime.ToString(".00");
+        SetCurrenTimeText(gameTime);
     }
-
-    // [ClientRpc]
-    // private void ShutDownServerForAllClientRpc()
-    // {
-    //     NetworkManager.Singleton.SceneManager.LoadScene("Lobby",LoadSceneMode.Single);
-    //     NetworkManager.Singleton.Shutdown();
-    //     try
-    //     {
-    //         Destroy(FindObjectOfType<LobbyController>().gameObject);
-    //         Destroy(FindObjectOfType<NetworkManager>().gameObject);
-    //     }
-    //     catch (Exception e)
-    //     {
-    //     }
-    // }
 
     #endregion
 }

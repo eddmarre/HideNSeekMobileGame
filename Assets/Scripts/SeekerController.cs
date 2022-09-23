@@ -19,7 +19,7 @@ public class SeekerController : PlayerController
     [SerializeField] private float _fireBallCooldownTime = 5f;
 
 
-    private int numberOfInteractablesInArea;
+    private int _numberOfInteractablesInArea;
     private float _timeSinceLastFireBallShot = 5f;
 
     private NetworkVariable<bool> _hasShotFireball = new NetworkVariable<bool>();
@@ -32,46 +32,17 @@ public class SeekerController : PlayerController
 
         if (IsClient && IsOwner)
         {
-            _shootFireBallButton.onClick.AddListener(() =>
-            {
-                ShootFireBallServerRpc(_fireBallSpawnLocationTransform.position,
-                    GetComponent<NetworkObject>().OwnerClientId);
-            });
-
-            _attackButton.onClick.AddListener(() =>
-            {
-                if (numberOfInteractablesInArea != 0)
-                {
-                    if (!_interactableColliders[0].TryGetComponent(out HiderController _seekerController)) return;
-                    if (_seekerController.GetIsDead()) return;
-                    var otherPlayerPosition = _seekerController.transform.position;
-                    AttackPlayerServerRpc(new Vector3(otherPlayerPosition.x, transform.position.y,
-                        otherPlayerPosition.z));
-
-
-                    _seekerController.HitPlayer();
-                }
-            });
-
-            _attackButton.interactable = false;
+            InitializeSeekerButtons();
         }
     }
-
+    
     protected override void Update()
     {
         base.Update();
 
         if (IsServer)
         {
-            if (_hasShotFireball.Value)
-            {
-                _timeSinceLastFireBallShot -= Time.deltaTime;
-                if (_timeSinceLastFireBallShot < -0f)
-                {
-                    _timeSinceLastFireBallShot = _fireBallCooldownTime;
-                    _hasShotFireball.Value = false;
-                }
-            }
+            FireBallCoolDownHandler();
         }
 
         if (IsClient && IsOwner)
@@ -86,15 +57,14 @@ public class SeekerController : PlayerController
 
     private void UpdateClient()
     {
-        numberOfInteractablesInArea = Physics.OverlapSphereNonAlloc(_sphereCollider.transform.position,
-            _sphereCollider.radius, _interactableColliders,
-            _interactLayerMask);
+        _numberOfInteractablesInArea =
+            CheckAreaAroundPlayer(_sphereCollider, _interactableColliders, _interactLayerMask);
 
         CanShootFireBallButtonEnabler();
 
         CanAttackButtonEnabler();
-
-        if (Input.GetKeyDown(KeyCode.Q) && numberOfInteractablesInArea != 0)
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.Q) && _numberOfInteractablesInArea != 0)
         {
             if (!_interactableColliders[0].TryGetComponent(out HiderController _seekerController)) return;
 
@@ -112,11 +82,53 @@ public class SeekerController : PlayerController
             ShootFireBallServerRpc(_fireBallSpawnLocationTransform.position,
                 GetComponent<NetworkObject>().OwnerClientId);
         }
+#endif
+    }
+
+    private void FireBallCoolDownHandler()
+    {
+        if (_hasShotFireball.Value)
+        {
+            _timeSinceLastFireBallShot -= Time.deltaTime;
+            if (_timeSinceLastFireBallShot < -0f)
+            {
+                _timeSinceLastFireBallShot = _fireBallCooldownTime;
+                _hasShotFireball.Value = false;
+            }
+        }
+    }
+
+    private void InitializeSeekerButtons()
+    {
+        _shootFireBallButton.onClick.AddListener(() =>
+        {
+            ShootFireBallServerRpc(_fireBallSpawnLocationTransform.position,
+                GetComponent<NetworkObject>().OwnerClientId);
+        });
+
+        _attackButton.onClick.AddListener(() =>
+        {
+            if (_numberOfInteractablesInArea != 0)
+            {
+                if (!_interactableColliders[0].TryGetComponent(out HiderController _seekerController)) return;
+                
+                if (_seekerController.GetIsDead()) return;
+                
+                var otherPlayerPosition = _seekerController.transform.position;
+                AttackPlayerServerRpc(new Vector3(otherPlayerPosition.x, transform.position.y,
+                    otherPlayerPosition.z));
+
+
+                _seekerController.HitPlayer();
+            }
+        });
+
+        _attackButton.interactable = false;
     }
 
     private void CanAttackButtonEnabler()
     {
-        if (numberOfInteractablesInArea != 0)
+        if (_numberOfInteractablesInArea != 0)
         {
             if (!_interactableColliders[0].TryGetComponent(out HiderController _hiderController))
             {
@@ -157,8 +169,7 @@ public class SeekerController : PlayerController
         var fireBallFunc = fireball.GetComponent<FireBall>();
 
         fireBallFunc.SetForwardDirection(transform.TransformDirection(Vector3.forward));
-        fireBallFunc.SetPlayer(NetworkManager.Singleton.ConnectedClients[clientID].PlayerObject
-            .GetComponent<GameObject>());
+
 
         fireBallFunc.GetComponent<NetworkObject>().SpawnWithOwnership(clientID);
     }

@@ -14,6 +14,7 @@ public class HideNSeekGameManager : NetworkBehaviour
     [SerializeField] private Button _startGameButton;
     [SerializeField] private GameContextUI _gameContextUI;
     [SerializeField] private float _gamePlayTime = 100f;
+    [SerializeField] private bool _isTesting = true;
 
     private NetworkVariable<bool> _netIsSeekerAvailable = new NetworkVariable<bool>();
     private NetworkVariable<bool> _netIsHiderAvailable = new NetworkVariable<bool>();
@@ -40,27 +41,23 @@ public class HideNSeekGameManager : NetworkBehaviour
     {
         if (IsHost)
         {
-            _startGameButton.gameObject.SetActive(true);
-            //  _startGameButton.interactable = false;
-            _startGameButton.onClick.AddListener(OnGameStarted);
+            EnableStartGameButton();
         }
 
         if (!IsServer) return;
-        _netIsSeekerAvailable.Value = true;
-        _netIsHiderAvailable.Value = true;
-        NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Singleton_OnClientConnectedCallback;
-        NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Singleton_OnClientDisconnectCallback;
-        ChooseCharacter.OnChooseSeeker += ChooseCharacter_OnChooseSeeker;
-        ChooseCharacter.OnChooseHider += ChooseCharacter_OnChooseHider;
-        HiderController.OnDeath += HiderController_OnDeath;
-        HiderController.OnRevive += HiderController_OnRevive;
-        _gameContextUI.OnGameOver += GameContextUI_OnGameOver;
+
+        SetIsSeekerAvailable(true);
+        SetIsHiderAvailable(true);
+
+        SubscribeToEvents();
+
         _hostClientID = OwnerClientId;
     }
 
+
     private void FixedUpdate()
     {
-
+#if UNITY_EDITOR
         if (IsServer)
         {
             if (Input.GetKeyDown(KeyCode.J))
@@ -81,31 +78,16 @@ public class HideNSeekGameManager : NetworkBehaviour
                 }
             }
         }
-        
-        
+#endif
+
         if (IsServer && _hasGameStarted)
         {
-            if (_hidersAlive.Count == 0)
-            {
-                GameContextUI_OnGameOver();
-            }
+            GameOverIfAllPlayersDie();
         }
-
 
         if (!IsServer || _hasGameStarted) return;
-        var allSeekers = GameObject.FindGameObjectsWithTag("Dragon");
-        if (allSeekers.Length > 1)
-        {
-            for (int i = 0; i < allSeekers.Length; i++)
-            {
-                if (allSeekers[i].GetComponent<NetworkObject>().OwnerClientId.Equals(_hostClientID))
-                    continue;
 
-                NetworkManager.Singleton.DisconnectClient(allSeekers[i]
-                    .GetComponent<NetworkObject>()
-                    .OwnerClientId);
-            }
-        }
+        CheckIfMultipleSeekers();
 
         if (!_netIsSeekerAvailable.Value)
         {
@@ -121,36 +103,42 @@ public class HideNSeekGameManager : NetworkBehaviour
         {
             _startGameButton.interactable = true;
         }
-        
     }
+
 
     public override void OnDestroy()
     {
         base.OnDestroy();
-        ChooseCharacter.OnChooseSeeker -= ChooseCharacter_OnChooseSeeker;
-        ChooseCharacter.OnChooseHider -= ChooseCharacter_OnChooseHider;
-        HiderController.OnDeath -= HiderController_OnDeath;
-        HiderController.OnRevive -= HiderController_OnRevive;
-        _gameContextUI.OnGameOver -= GameContextUI_OnGameOver;
-        try
-        {
-            NetworkManager.Singleton.OnClientConnectedCallback -= NetworkManager_Singleton_OnClientConnectedCallback;
-            NetworkManager.Singleton.OnClientDisconnectCallback -= NetworkManager_Singleton_OnClientDisconnectCallback;
-        }
-        catch (Exception e)
-        {
-            Debug.Log("no connected clients to unregister");
-        }
+        TryUnSubscribeToEvents();
     }
 
     #endregion
 
     #region Events
 
+    private void OnGameStarted()
+    {
+        if (!_isTesting && _numberOfPlayersInLobby != 5) return;
+        _gameContextUI.SetStartTime(_gamePlayTime);
+        _gameContextUI.SetHasGameStarted(true);
+        _hasGameStarted = true;
+        InteractSpawner.Instance.SpawnObjects();
+        _startGameButton.gameObject.SetActive(false);
+
+        foreach (var client in NetworkManager.Singleton.ConnectedClients)
+        {
+            var clientPlayerController = client.Value.PlayerObject.GetComponent<PlayerController>();
+            clientPlayerController.transform.position = new Vector3(0f, 10f, 0f);
+
+            DisplayGameStartMessageToSeeker(clientPlayerController, client);
+
+            DisplayGameStartMessageToHiders(clientPlayerController, client);
+        }
+    }
+
     private void ChooseCharacter_OnChooseSeeker(ulong clientID)
     {
-        _netIsSeekerAvailable.Value = false;
-        // _seekerButton.interactable = _netIsSeekerAvailable.Value;
+        SetIsSeekerAvailable(false);
         _playerControllers.Add(clientID,
             NetworkManager.Singleton.ConnectedClients[clientID].PlayerObject.GetComponent<PlayerController>());
         EnableOrDisableSeekerButtonClientRpc();
@@ -162,21 +150,18 @@ public class HideNSeekGameManager : NetworkBehaviour
 
         if (_netNumberOfHiders.Value == 4)
         {
-            _netIsHiderAvailable.Value = false;
+            SetIsHiderAvailable(false);
         }
         else
         {
-            _netIsHiderAvailable.Value = true;
+            SetIsHiderAvailable(true);
         }
-
-        // _hiderButton.interactable = _netIsHiderAvailable.Value;
 
         EnableOrDisableHiderButtonClientRpc();
 
         _playerControllers.Add(clientID,
             NetworkManager.Singleton.ConnectedClients[clientID].PlayerObject.GetComponent<PlayerController>());
     }
-
 
     private void NetworkManager_Singleton_OnClientConnectedCallback(ulong connectedClientID)
     {
@@ -219,18 +204,10 @@ public class HideNSeekGameManager : NetworkBehaviour
         try
         {
             _gameContextUI.SetPlayerCount(_numberOfPlayersInLobby);
-            if (_playerControllers[connectedClientID].TryGetComponent(out HiderController _hiderController))
-            {
-                _netNumberOfHiders.Value -= 1;
-                _netIsHiderAvailable.Value = true;
-                EnableOrDisableHiderButtonClientRpc();
-            }
 
-            if (_playerControllers[connectedClientID].TryGetComponent(out SeekerController _seekerController))
-            {
-                _netIsSeekerAvailable.Value = true;
-                EnableOrDisableSeekerButtonClientRpc();
-            }
+            IfHiderDisconnectsMakeButtonActive(connectedClientID);
+
+            IfSeekerDisconnectsMakeButtonActive(connectedClientID);
 
             _playerControllers.Remove(connectedClientID);
         }
@@ -239,7 +216,7 @@ public class HideNSeekGameManager : NetworkBehaviour
             Debug.Log(e.Message);
         }
     }
-
+    
     private void GameContextUI_OnGameOver()
     {
         foreach (var playerController in _playerControllers)
@@ -258,13 +235,13 @@ public class HideNSeekGameManager : NetworkBehaviour
 
     private void HiderController_OnDeath(ulong clientID)
     {
-        _hidersDead.Add(clientID,_hidersAlive[clientID]);
+        _hidersDead.Add(clientID, _hidersAlive[clientID]);
         _hidersAlive.Remove(clientID);
     }
 
     private void HiderController_OnRevive(ulong clientID)
     {
-        _hidersAlive.Add(clientID,_hidersDead[clientID]);
+        _hidersAlive.Add(clientID, _hidersDead[clientID]);
         _hidersDead.Remove(clientID);
     }
 
@@ -272,40 +249,113 @@ public class HideNSeekGameManager : NetworkBehaviour
 
     #region Method
 
-    private void OnGameStarted()
+    private void IfSeekerDisconnectsMakeButtonActive(ulong connectedClientID)
     {
-        // if(_numberOfPlayersInLobby!=5) return;
-        _gameContextUI.SetStartTime(_gamePlayTime);
-        _gameContextUI.SetHasGameStarted(true);
-        _hasGameStarted = true;
-        InteractSpawner.Instance.SpawnObjects();
-        _startGameButton.gameObject.SetActive(false);
-
-        foreach (var client in NetworkManager.Singleton.ConnectedClients)
+        if (_playerControllers[connectedClientID].TryGetComponent(out SeekerController _seekerController))
         {
-            var clientPlayerController = client.Value.PlayerObject.GetComponent<PlayerController>();
-            clientPlayerController.transform.position = new Vector3(0f, 10f, 0f);
+            SetIsSeekerAvailable(true);
+            EnableOrDisableSeekerButtonClientRpc();
+        }
+    }
 
-            if (clientPlayerController.transform.TryGetComponent(out SeekerController _seekerController))
-            {
-                if (IsServer)
-                    _seekerController.SetShowObjectiveText("Go find all the hiders");
-                if (IsClient)
-                {
-                    ShowTextForClientsServerRpc(client.Key, 0, "Go find all the hiders");
-                }
-            }
+    private void IfHiderDisconnectsMakeButtonActive(ulong connectedClientID)
+    {
+        if (_playerControllers[connectedClientID].TryGetComponent(out HiderController _hiderController))
+        {
+            _netNumberOfHiders.Value -= 1;
+            SetIsHiderAvailable(true);
+            EnableOrDisableHiderButtonClientRpc();
+        }
+    }
 
-            if (clientPlayerController.transform.TryGetComponent(out HiderController _hiderController))
+    private void CheckIfMultipleSeekers()
+    {
+        var allSeekers = GameObject.FindGameObjectsWithTag("Dragon");
+        if (allSeekers.Length > 1)
+        {
+            for (int i = 0; i < allSeekers.Length; i++)
             {
-                _hidersAlive.Add(client.Key, _hiderController);
-                if (IsServer)
-                    _hiderController.SetShowObjectiveText("Hide from the dragon");
-                if (IsClient)
-                {
-                    ShowTextForClientsServerRpc(client.Key, 1, "Hide from the dragon");
-                }
+                if (allSeekers[i].GetComponent<NetworkObject>().OwnerClientId.Equals(_hostClientID))
+                    continue;
+
+                NetworkManager.Singleton.DisconnectClient(allSeekers[i]
+                    .GetComponent<NetworkObject>()
+                    .OwnerClientId);
             }
+        }
+    }
+
+    private void GameOverIfAllPlayersDie()
+    {
+        if (_hidersAlive.Count == 0)
+        {
+            GameContextUI_OnGameOver();
+        }
+    }
+
+    private void SetIsHiderAvailable(bool value)
+    {
+        _netIsHiderAvailable.Value = value;
+    }
+
+    private void SetIsSeekerAvailable(bool value)
+    {
+        _netIsSeekerAvailable.Value = value;
+    }
+
+    private void EnableStartGameButton()
+    {
+        _startGameButton.gameObject.SetActive(true);
+        _startGameButton.onClick.AddListener(OnGameStarted);
+    }
+
+    private void SubscribeToEvents()
+    {
+        NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_Singleton_OnClientConnectedCallback;
+        NetworkManager.Singleton.OnClientDisconnectCallback += NetworkManager_Singleton_OnClientDisconnectCallback;
+        ChooseCharacter.OnChooseSeeker += ChooseCharacter_OnChooseSeeker;
+        ChooseCharacter.OnChooseHider += ChooseCharacter_OnChooseHider;
+        HiderController.OnDeath += HiderController_OnDeath;
+        HiderController.OnRevive += HiderController_OnRevive;
+        _gameContextUI.OnGameOver += GameContextUI_OnGameOver;
+    }
+
+    private void TryUnSubscribeToEvents()
+    {
+        ChooseCharacter.OnChooseSeeker -= ChooseCharacter_OnChooseSeeker;
+        ChooseCharacter.OnChooseHider -= ChooseCharacter_OnChooseHider;
+        HiderController.OnDeath -= HiderController_OnDeath;
+        HiderController.OnRevive -= HiderController_OnRevive;
+        _gameContextUI.OnGameOver -= GameContextUI_OnGameOver;
+        try
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback -= NetworkManager_Singleton_OnClientConnectedCallback;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= NetworkManager_Singleton_OnClientDisconnectCallback;
+        }
+        catch (Exception e)
+        {
+            Debug.Log("no connected clients to unregister");
+        }
+    }
+
+
+    private void DisplayGameStartMessageToHiders(PlayerController clientPlayerController,
+        KeyValuePair<ulong, NetworkClient> client)
+    {
+        if (clientPlayerController.transform.TryGetComponent(out HiderController _hiderController))
+        {
+            _hidersAlive.Add(client.Key, _hiderController);
+
+            ShowTextForClientsServerRpc(client.Key, 1, "Hide from the dragon");
+        }
+    }
+
+    private void DisplayGameStartMessageToSeeker(PlayerController clientPlayerController,
+        KeyValuePair<ulong, NetworkClient> client)
+    {
+        if (clientPlayerController.transform.TryGetComponent(out SeekerController _seekerController))
+        {
+            ShowTextForClientsServerRpc(client.Key, 0, "Go find all the hiders");
         }
     }
 
@@ -349,24 +399,14 @@ public class HideNSeekGameManager : NetworkBehaviour
     #region ClientRpc
 
     [ClientRpc]
-    private void SendPlayerBackToLobbyClientRpc(ClientRpcParams rpcParams = default)
-    {
-        if (IsHost) return;
-        NetworkManager.Singleton.SceneManager.LoadScene("Lobby", LoadSceneMode.Single);
-    }
-
-
-    [ClientRpc]
     private void EnableOrDisableHiderButtonClientRpc(ClientRpcParams rpcParams = default)
     {
-        // if (IsHost) return;
         _hiderButton.interactable = _netIsHiderAvailable.Value;
     }
 
     [ClientRpc]
     private void EnableOrDisableSeekerButtonClientRpc(ClientRpcParams rpcParams = default)
     {
-        // if (IsHost) return;
         _seekerButton.interactable = _netIsSeekerAvailable.Value;
     }
 

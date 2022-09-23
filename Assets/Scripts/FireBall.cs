@@ -10,7 +10,7 @@ public class FireBall : NetworkBehaviour
 {
     [SerializeField] private float movementSpeed = 50f;
     private Vector3 _forwardDirection;
-    private GameObject _myPlayer;
+
 
     private void Start()
     {
@@ -20,22 +20,9 @@ public class FireBall : NetworkBehaviour
     private IEnumerator DestroyAfterSomeTime(float time)
     {
         yield return new WaitForSeconds(time);
-        DespawnOnNetwork();
+        DespawnOnNetworkServerRpc();
     }
 
-    private void DespawnOnNetwork()
-    {
-        if (IsServer)
-        {
-            Destroy(gameObject);
-        }
-
-        if (IsClient && IsOwner)
-        {
-            DespawnOnNetworkServerRpc();
-        }
-    }
-    
     private void Update()
     {
         if (IsServer)
@@ -47,36 +34,21 @@ public class FireBall : NetworkBehaviour
         _forwardDirection = dir;
     }
 
-    public void SetPlayer(GameObject player)
-    {
-        _myPlayer = player;
-    }
-
     private void OnCollisionEnter(Collision collision)
     {
-        // if (!IsOwner) return;
-        if (collision.gameObject.Equals(_myPlayer)) return;
-
-        Debug.Log(collision.transform.name);
-
         if (collision.transform.TryGetComponent(out HiderController _seekerController))
         {
-            if(IsServer)
-                _seekerController.HitPlayer();
-            if (IsClient)
-            {
-                var clientID=_seekerController.GetComponent<NetworkObject>().OwnerClientId;
-                HitPlayerServerRpc(clientID);
-            }
+            var clientID = _seekerController.GetComponent<NetworkObject>().OwnerClientId;
+            HitPlayerServerRpc(clientID);
         }
-        
-        
-        DespawnOnNetwork();
+
+
+        DespawnOnNetworkServerRpc();
     }
 
     #region ServerRpc
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void DespawnOnNetworkServerRpc()
     {
         GetComponent<NetworkObject>().Despawn();
@@ -85,7 +57,9 @@ public class FireBall : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void HitPlayerServerRpc(ulong seekerController)
     {
-        NetworkManager.Singleton.ConnectedClients[seekerController].PlayerObject.GetComponent<HiderController>().HitPlayer();
+        NetworkManager.Singleton.ConnectedClients[seekerController].PlayerObject.GetComponent<HiderController>()
+            .HitPlayer();
     }
+
     #endregion
 }
