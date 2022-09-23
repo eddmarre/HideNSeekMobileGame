@@ -2680,7 +2680,7 @@ GameObject:
   - component: {fileID: 6039926984646055696}
   - component: {fileID: 6039926984646055697}
   m_Layer: 6
-  m_Name: DragonPlayer
+  m_Name: SeekerPlayer
   m_TagString: Dragon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
