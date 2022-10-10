@@ -5,6 +5,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class HideNSeekGameManager : NetworkBehaviour
 {
@@ -15,6 +16,7 @@ public class HideNSeekGameManager : NetworkBehaviour
     [SerializeField] private GameContextUI _gameContextUI;
     [SerializeField] private float _gamePlayTime = 100f;
     [SerializeField] private bool _isTesting = true;
+    [SerializeField] private Vector3[] _spawnPositions;
 
     private NetworkVariable<bool> _netIsSeekerAvailable = new NetworkVariable<bool>();
     private NetworkVariable<bool> _netIsHiderAvailable = new NetworkVariable<bool>();
@@ -127,8 +129,10 @@ public class HideNSeekGameManager : NetworkBehaviour
 
         foreach (var client in NetworkManager.Singleton.ConnectedClients)
         {
+            var randomSpawnPoint = Random.Range(0, _spawnPositions.Length);
+            
             var clientPlayerController = client.Value.PlayerObject.GetComponent<PlayerController>();
-            clientPlayerController.transform.position = new Vector3(0f, 10f, 0f);
+            clientPlayerController.transform.position = _spawnPositions[randomSpawnPoint];
 
             DisplayGameStartMessageToSeeker(clientPlayerController, client);
 
@@ -216,7 +220,7 @@ public class HideNSeekGameManager : NetworkBehaviour
             Debug.Log(e.Message);
         }
     }
-    
+
     private void GameContextUI_OnGameOver()
     {
         foreach (var playerController in _playerControllers)

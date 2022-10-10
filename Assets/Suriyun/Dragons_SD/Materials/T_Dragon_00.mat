@@ -1,29 +1,119 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!28 &-9100754848948211042
+Texture2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: z__GradientRampTex{"mode":0,"colorKeys":[{"color":{"r":0.0,"g":0.0,"b":0.0,"a":1.0},"time":0.0},{"color":{"r":1.0,"g":1.0,"b":1.0,"a":1.0},"time":1.0}],"alphaKeys":[{"alpha":1.0,"time":0.0},{"alpha":1.0,"time":1.0}]}
+  m_ImageContentsHash:
+    serializedVersion: 2
+    Hash: 00000000000000000000000000000000
+  m_ForcedFallbackFormat: 4
+  m_DownscaleFallback: 0
+  m_IsAlphaChannelOptional: 0
+  serializedVersion: 2
+  m_Width: 256
+  m_Height: 1
+  m_CompleteImageSize: 1024
+  m_MipsStripped: 0
+  m_TextureFormat: 5
+  m_MipCount: 1
+  m_IsReadable: 1
+  m_IsPreProcessed: 0
+  m_IgnoreMasterTextureLimit: 0
+  m_StreamingMipmaps: 0
+  m_StreamingMipmapsPriority: 0
+  m_VTOnly: 0
+  m_AlphaIsTransparency: 0
+  m_ImageCount: 1
+  m_TextureDimension: 2
+  m_TextureSettings:
+    serializedVersion: 2
+    m_FilterMode: 1
+    m_Aniso: 1
+    m_MipBias: 0
+    m_WrapU: 1
+    m_WrapV: 1
+    m_WrapW: 1
+  m_LightmapFormat: 0
+  m_ColorSpace: 0
+  m_PlatformBlob: 
+  image data: 1024
+  _typelessdata: ff000000ff010101ff020202ff030303ff040404ff050505ff060606ff070707ff080808ff090909ff0a0a0aff0b0b0bff0c0c0cff0d0d0dff0e0e0eff0f0f0fff101010ff111111ff121212ff131313ff141414ff151515ff161616ff171717ff181818ff191919ff1a1a1aff1b1b1bff1c1c1cff1d1d1dff1e1e1eff1f1f1fff202020ff212121ff222222ff232323ff242424ff252525ff262626ff272727ff282828ff292929ff2a2a2aff2b2b2bff2c2c2cff2d2d2dff2e2e2eff2f2f2fff303030ff313131ff323232ff333333ff343434ff353535ff363636ff373737ff383838ff393939ff3a3a3aff3b3b3bff3c3c3cff3d3d3dff3e3e3eff3f3f3fff404040ff414141ff424242ff434343ff444444ff454545ff464646ff474747ff484848ff494949ff4a4a4aff4b4b4bff4c4c4cff4d4d4dff4e4e4eff4f4f4fff505050ff515151ff525252ff535353ff545454ff555555ff565656ff575757ff585858ff595959ff5a5a5aff5b5b5bff5c5c5cff5d5d5dff5e5e5eff5f5f5fff606060ff616161ff626262ff636363ff646464ff656565ff666666ff676767ff686868ff696969ff6a6a6aff6b6b6bff6c6c6cff6d6d6dff6e6e6eff6f6f6fff707070ff717171ff727272ff737373ff747474ff757575ff767676ff777777ff787878ff797979ff7a7a7aff7b7b7bff7c7c7cff7d7d7dff7e7e7eff7f7f7fff808080ff818181ff828282ff838383ff848484ff858585ff868686ff878787ff888888ff898989ff8a8a8aff8b8b8bff8c8c8cff8d8d8dff8e8e8eff8f8f8fff909090ff919191ff929292ff939393ff949494ff959595ff969696ff979797ff989898ff999999ff9a9a9aff9b9b9bff9c9c9cff9d9d9dff9e9e9eff9f9f9fffa0a0a0ffa1a1a1ffa2a2a2ffa3a3a3ffa4a4a4ffa5a5a5ffa6a6a6ffa7a7a7ffa8a8a8ffa9a9a9ffaaaaaaffabababffacacacffadadadffaeaeaeffafafafffb0b0b0ffb1b1b1ffb2b2b2ffb3b3b3ffb4b4b4ffb5b5b5ffb6b6b6ffb7b7b7ffb8b8b8ffb9b9b9ffbababaffbbbbbbffbcbcbcffbdbdbdffbebebeffbfbfbfffc0c0c0ffc1c1c1ffc2c2c2ffc3c3c3ffc4c4c4ffc5c5c5ffc6c6c6ffc7c7c7ffc8c8c8ffc9c9c9ffcacacaffcbcbcbffccccccffcdcdcdffcececeffcfcfcfffd0d0d0ffd1d1d1ffd2d2d2ffd3d3d3ffd4d4d4ffd5d5d5ffd6d6d6ffd7d7d7ffd8d8d8ffd9d9d9ffdadadaffdbdbdbffdcdcdcffddddddffdededeffdfdfdfffe0e0e0ffe1e1e1ffe2e2e2ffe3e3e3ffe4e4e4ffe5e5e5ffe6e6e6ffe7e7e7ffe8e8e8ffe9e9e9ffeaeaeaffebebebffecececffedededffeeeeeeffefefeffff0f0f0fff1f1f1fff2f2f2fff3f3f3fff4f4f4fff5f5f5fff6f6f6fff7f7f7fff8f8f8fff9f9f9fffafafafffbfbfbfffcfcfcfffdfdfdfffefefeffffffff
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: T_Dragon_00
-  m_Shader: {fileID: 4800000, guid: b35a2abbdd5b15d4ca40103088758eac, type: 3}
-  m_ShaderKeywords: 
+  m_Shader: {fileID: 4800000, guid: 2a230514c860643f69b6a4d1871d3825, type: 3}
+  m_ValidKeywords:
+  - DR_GRADIENT_ON
+  - DR_OUTLINE_ON
+  - DR_RIM_ON
+  - DR_SPECULAR_ON
+  - _DETAILMAPBLENDINGMODE_MULTIPLY
+  - _RECEIVE_SHADOWS_OFF
+  - _TEXTUREBLENDINGMODE_MULTIPLY
+  m_InvalidKeywords:
+  - _RECEIVESHADOWS_OFF
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
+  m_CustomRenderQueue: 2000
+  stringTagMap:
+    IgnoreProjection: False
+    RenderType: Opaque
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _1st_ShadeMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _2nd_ShadeMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _AngelRing_Sampler:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BakedGIRamp:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BakedNormal:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: 1dde779825f913145adc1711221ef080, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _ClippingMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -39,6 +129,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Emissive_Tex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _EnvMapSampler:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -47,11 +141,31 @@ Material:
         m_Texture: {fileID: 2800000, guid: a1d5b2277eb3f6245900378e6fa97575, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _GradientRamp:
+        m_Texture: {fileID: -9100754848948211042}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HighColor_Tex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 2800000, guid: 1dde779825f913145adc1711221ef080, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _MatCap_Sampler:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMapForMatCap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -63,12 +177,44 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _OutlineTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Outline_Sampler:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RimLightSampler:
         m_Texture: {fileID: 2800000, guid: cc8f70f2ec571e9478efa98c041cde7b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Set_1st_ShadePosition:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Set_2nd_ShadePosition:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Set_HighColorMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Set_MatcapMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Set_RimLightMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ShadingGradeMap:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
@@ -79,27 +225,205 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
+    - _1st2nd_Shades_Feather: 0.1
+    - _1st_ShadeColor_Feather: 0.035
+    - _1st_ShadeColor_Step: 0.4
+    - _2nd_ShadeColor_Feather: 0.1
+    - _2nd_ShadeColor_Step: 0
+    - _ARSampler_AlphaOn: 0
+    - _AR_OffsetU: 0
+    - _AR_OffsetV: 0.3
+    - _Add_Antipodean_RimLight: 0
+    - _AlphaClip: 0
+    - _AngelRing: 0
+    - _Ap_RimLight_FeatherOff: 0
+    - _Ap_RimLight_Power: 0.1
+    - _AutoRenderQueue: 1
+    - _BaseColor_Step: 0.4
+    - _BaseShade_Feather: 0.035
+    - _Base_Speed: 0
+    - _Blend: 0
+    - _BlurLevelMatcap: 0
+    - _BlurLevelSGM: 0
     - _BumpScale: 1
+    - _BumpScaleMatcap: 1
+    - _CameraDistanceImpact: 0.5
+    - _CameraRolling_Stabilizer: 0
+    - _ClippingMode: 0
+    - _Clipping_Level: 0
+    - _ColorShift_Speed: 0
+    - _Cull: 2
+    - _CullMode: 2
     - _Cutoff: 0.5
     - _DepthBias: 0.00012
+    - _DetailMapBlendingMode: 0
+    - _DetailMapImpact: 0.258
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _EMISSIVE: 0
     - _EdgeThickness: 1
+    - _Farthest_Distance: 100
+    - _FlatRimEdgeSmoothness: 0.33
+    - _FlatRimLightAlign: 0.203
+    - _FlatRimSize: 0.351
+    - _FlatSpecularEdgeSmoothness: 0
+    - _FlatSpecularSize: 0.087
+    - _GI_Intensity: 0
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _GradientAngle: 0
+    - _GradientCenterX: 0
+    - _GradientCenterY: 0
+    - _GradientEnabled: 1
+    - _GradientSize: 4.48
+    - _HighColor_Power: 0
+    - _Inverse_Clipping: 0
+    - _Inverse_MatcapMask: 0
+    - _Inverse_Z_Axis_BLD: 1
+    - _IsBaseMapAlphaAsClippingMask: 0
+    - _Is_BLD: 0
+    - _Is_BakedNormal: 0
+    - _Is_BlendAddToHiColor: 0
+    - _Is_BlendAddToMatCap: 1
+    - _Is_BlendBaseColor: 0
+    - _Is_ColorShift: 0
+    - _Is_Filter_HiCutPointLightColor: 1
+    - _Is_Filter_LightColor: 0
+    - _Is_LightColor_1st_Shade: 1
+    - _Is_LightColor_2nd_Shade: 1
+    - _Is_LightColor_AR: 1
+    - _Is_LightColor_Ap_RimLight: 1
+    - _Is_LightColor_Base: 1
+    - _Is_LightColor_HighColor: 1
+    - _Is_LightColor_MatCap: 1
+    - _Is_LightColor_Outline: 1
+    - _Is_LightColor_RimLight: 1
+    - _Is_NormalMapForMatCap: 0
+    - _Is_NormalMapToBase: 0
+    - _Is_NormalMapToHighColor: 0
+    - _Is_NormalMapToRimLight: 0
+    - _Is_Ortho: 0
+    - _Is_OutlineTex: 0
+    - _Is_PingPong_Base: 0
+    - _Is_SpecularToHighColor: 0
+    - _Is_UseTweakHighColorOnShadow: 0
+    - _Is_UseTweakMatCapOnShadow: 0
+    - _Is_ViewCoord_Scroll: 0
+    - _Is_ViewShift: 0
+    - _LightContribution: 1
+    - _LightDirection_MaskOn: 0
+    - _LightmapDirectionPitch: 0
+    - _LightmapDirectionYaw: 0
+    - _MatCap: 0
     - _Metallic: 0
     - _Mode: 0
+    - _Nearest_Distance: 0.5
+    - _OUTLINE: 0
     - _OcclusionStrength: 1
+    - _Offset_X_Axis_BLD: -0.05
+    - _Offset_Y_Axis_BLD: 0.09
+    - _Offset_Z: 0
+    - _OutlineDepthOffset: 0
+    - _OutlineEnabled: 1
+    - _OutlineScale: 1
+    - _OutlineWidth: 1.66
+    - _Outline_Width: 1
+    - _OverrideBakedGi: 0
+    - _OverrideLightAttenuation: 0
+    - _OverrideLightmapDir: 0
     - _Parallax: 0.02
+    - _QueueOffset: 0
+    - _ReceiveShadows: 0
+    - _RimEnabled: 1
+    - _RimLight: 1
+    - _RimLight_FeatherOff: 0
+    - _RimLight_InsideMask: 0.3
+    - _RimLight_Power: 0.1
+    - _Rotate_EmissiveUV: 0
+    - _Rotate_MatCapUV: 0
+    - _Rotate_NormalMapForMatCapUV: 0
+    - _SPRDefaultUnlitColorMask: 15
+    - _SRPDefaultUnlitColMode: 1
+    - _Scroll_EmissiveU: 0
+    - _Scroll_EmissiveV: 0
+    - _SelfShadingSize: 0.689
+    - _Set_SystemShadowsToBase: 1
+    - _ShadeColor_Step: 0
     - _SmoothnessTextureChannel: 0
+    - _SpecularEnabled: 1
     - _SpecularHighlights: 1
     - _SpecularPower: 20
     - _SrcBlend: 1
+    - _StencilComp: 0
+    - _StencilMode: 0
+    - _StencilNo: 1
+    - _StencilOpFail: 0
+    - _StencilOpPass: 0
+    - _StepOffset: 0
+    - _Surface: 0
+    - _TextureBlendingMode: 0
+    - _TextureImpact: 1
+    - _TransparentEnabled: 0
+    - _TweakHighColorOnShadow: 0
+    - _TweakMatCapOnShadow: 0
+    - _Tweak_HighColorMaskLevel: 0
+    - _Tweak_LightDirection_MaskLevel: 0
+    - _Tweak_MatCapUV: 0
+    - _Tweak_MatcapMaskLevel: 0
+    - _Tweak_RimLightMaskLevel: -0.6
+    - _Tweak_ShadingGradeMapLevel: 0
+    - _Tweak_SystemShadowsLevel: 0.3
+    - _Tweak_transparency: 0
     - _UVSec: 0
+    - _UnityShadowOcclusion: 0
+    - _Unlit_Intensity: 1
+    - _Use_1stAs2nd: 0
+    - _Use_BaseAs1st: 1
+    - _VertexColorsEnabled: 0
+    - _ZOverDrawMode: 0
     - _ZWrite: 1
+    - _ZWriteMode: 1
+    - _simpleUI: 0
+    - _utsTechnique: 0
+    - _utsVersionX: 2
+    - _utsVersionY: 2
+    - _utsVersionZ: 3
     m_Colors:
+    - _1st_ShadeColor: {r: 0.9433962, g: 0.87664646, b: 0.87664646, a: 1}
+    - _2nd_ShadeColor: {r: 1, g: 1, b: 1, a: 1}
+    - _AngelRing_Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Ap_RimLightColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorGradient: {r: 0.9339623, g: 0.58592916, b: 0.788506, a: 0.85056}
+    - _ColorShift: {r: 0, g: 0, b: 0, a: 1}
+    - _DetailMapColor: {r: 0.9339623, g: 0.33922213, b: 0.58006734, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
+    - _Emissive_Color: {r: 0, g: 0, b: 0, a: 1}
+    - _FlatRimColor: {r: 0.02745098, g: 0.02745098, b: 0.02745098, a: 0.85056}
+    - _FlatSpecularColor: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
+    - _HighColor: {r: 0, g: 0, b: 0, a: 1}
+    - _LightAttenuation: {r: 0, g: 1, b: 0, a: 0}
+    - _LightmapDirection: {r: 0, g: 1, b: 0, a: 0}
+    - _MatCapColor: {r: 1, g: 1, b: 1, a: 1}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+    - _Outline_Color: {r: 0.2264151, g: 0.2264151, b: 0.2264151, a: 1}
+    - _RimLightColor: {r: 1, g: 1, b: 1, a: 1}
     - _ShadowColor: {r: 0.8, g: 0.8, b: 1, a: 1}
+    - _ViewShift: {r: 0, g: 0, b: 0, a: 1}
+  m_BuildTextureStacks: []

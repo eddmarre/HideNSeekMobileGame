@@ -9,6 +9,7 @@ public class InteractSpawner : MonoBehaviour
 {
         [SerializeField] private Interactable _interactable;
         [SerializeField] private int numberOfRunesToFind;
+        [SerializeField] private Transform[] _interactableSpawns;
 
         public static InteractSpawner Instance { get; private set; }
 
@@ -22,9 +23,10 @@ public class InteractSpawner : MonoBehaviour
         {
                 for (int i = 0; i < numberOfRunesToFind; i++)
                 {
+                        var randomIndex = Random.Range(0, _interactableSpawns.Length);
                         var testInteract=Instantiate(_interactable.gameObject,
-                                new Vector3(Random.Range(-100f, 100f), transform.position.y, Random.Range(-100f, 100f)),
-                                Quaternion.identity);
+                                _interactableSpawns[randomIndex].position,
+                              _interactableSpawns[randomIndex].rotation);
                         testInteract.GetComponent<NetworkObject>().Spawn();
                 }        
         }

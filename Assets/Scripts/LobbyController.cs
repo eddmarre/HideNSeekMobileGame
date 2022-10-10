@@ -132,6 +132,7 @@ public class LobbyController : MonoBehaviour
     {
         while (true)
         {
+            Debug.Log("HeartBeatSent");
             Lobbies.Instance.SendHeartbeatPingAsync(lobbyId);
             yield return new WaitForSeconds(timeBetweenBeat);
         }

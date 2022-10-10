@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = System.Random;
 
 public class ChooseCharacter : NetworkBehaviour
 {
@@ -38,6 +39,11 @@ public class ChooseCharacter : NetworkBehaviour
         gameObject.SetActive(false);
     }
 
+    private Vector3 GenerateRandomPosition()
+    {
+        return new Vector3(UnityEngine.Random.Range(-5, 6), 0f, UnityEngine.Random.Range(-5, 6));
+    }
+
     #endregion
 
     #region ServerRPC
@@ -45,7 +51,8 @@ public class ChooseCharacter : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void SpawnPlayerAsDragonServerRpc(ulong clientId)
     {
-        var dragon = Instantiate(_dragonPlayer, Vector3.up, Quaternion.identity);
+        var dragon = Instantiate(_dragonPlayer, _spawnLocation.position + GenerateRandomPosition(),
+            Quaternion.identity);
         var netDragon = dragon.GetComponent<NetworkObject>();
         netDragon.SpawnAsPlayerObject(clientId, true);
 
@@ -55,7 +62,7 @@ public class ChooseCharacter : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void SpawnPlayerAsHiderServerRpc(ulong clientId)
     {
-        var dragon = Instantiate(_hiderPlayer, Vector3.up, Quaternion.identity);
+        var dragon = Instantiate(_hiderPlayer, _spawnLocation.position + GenerateRandomPosition(), Quaternion.identity);
         var netDragon = dragon.GetComponent<NetworkObject>();
         netDragon.SpawnAsPlayerObject(clientId, true);
 

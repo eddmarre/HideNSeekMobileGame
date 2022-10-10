@@ -18,6 +18,7 @@ public class PlayerCameraFollow : MonoBehaviour
     {
         _cinemachineVirtualCamera.Follow = transform;
         _cinemachineVirtualCamera.LookAt = transform;
+        _cinemachineVirtualCamera.m_Lens.NearClipPlane = 2.3f;
         var thirdPerson = _cinemachineVirtualCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
         thirdPerson.ShoulderOffset = new Vector3(.5f, 1.5f, 0f);
         thirdPerson.CameraDistance = 6f;
